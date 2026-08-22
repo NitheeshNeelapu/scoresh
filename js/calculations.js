@@ -1,8 +1,9 @@
 /**
  * Scoresh Pure Calculations & Scorecard Derivation Engine
- * Translates the C program mathematical logic and guarantees 100% data consistency
+ * Translates C program mathematical logic and guarantees 100% data consistency
  * by deriving Batsman scorecards, Bowler figures, Fall of Wickets, and Partnerships
  * directly from the underlying sequence of Ball Deliveries.
+ * Resolves all player entities strictly by Player IDs from tournament player database.
  */
 
 const ScoreshCalculations = {
@@ -100,11 +101,191 @@ const ScoreshCalculations = {
     },
 
     /**
+     * DYNAMIC WINNING PROBABILITY ENGINE
+     * Estimates dynamic win probabilities (0-100%, summing to 100%) for batting vs bowling teams.
+     * Evaluates current score, wickets in hand, balls remaining, target, CRR, RRR, and recent momentum.
+     */
+    calculateWinningProbability(match, currentInnings = null) {
+        if (!match) {
+            return {
+                battingTeamProb: 50,
+                bowlingTeamProb: 50,
+                teamAProb: 50,
+                teamBProb: 50,
+                teamAName: 'Team A',
+                teamBName: 'Team B',
+                teamAColor: '#16a34a',
+                teamBColor: '#0f172a',
+                runsRequired: null,
+                ballsRemaining: null,
+                requiredRunRate: null,
+                currentRunRate: 0.0,
+                equationText: 'Match ready'
+            };
+        }
+
+        const inn = currentInnings || match.currentInnings;
+        const totalOvers = match.totalOvers || 20;
+        const totalBalls = totalOvers * 6;
+        const isSecondInnings = match.currentInningIndex === 1 || inn.inningNumber === 2;
+
+        const battingTeamName = inn.battingTeamName || match.teamAName;
+        const bowlingTeamName = inn.bowlingTeamName || match.teamBName;
+
+        // Completed match
+        if (match.status === 'completed') {
+            const isBatWon = match.winnerTeamId === inn.battingTeamId;
+            const batProb = isBatWon ? 100 : (match.winnerTeamId ? 0 : 50);
+            return {
+                battingTeamId: inn.battingTeamId,
+                bowlingTeamId: inn.bowlingTeamId,
+                battingTeamName,
+                bowlingTeamName,
+                battingTeamProb: batProb,
+                bowlingTeamProb: 100 - batProb,
+                teamAProb: match.winnerTeamId === match.teamAId ? 100 : (match.winnerTeamId === match.teamBId ? 0 : 50),
+                teamBProb: match.winnerTeamId === match.teamBId ? 100 : (match.winnerTeamId === match.teamAId ? 0 : 50),
+                teamAName: match.teamAName,
+                teamBName: match.teamBName,
+                teamAColor: match.teamAColor || '#16a34a',
+                teamBColor: match.teamBColor || '#0f172a',
+                runsRequired: null,
+                ballsRemaining: null,
+                requiredRunRate: null,
+                currentRunRate: inn.runRate,
+                equationText: match.resultSummary || 'Match Completed'
+            };
+        }
+
+        // Match upcoming / not started
+        if (match.status === 'upcoming' || inn.legalBalls === 0) {
+            return {
+                battingTeamId: inn.battingTeamId,
+                bowlingTeamId: inn.bowlingTeamId,
+                battingTeamName,
+                bowlingTeamName,
+                battingTeamProb: 50,
+                bowlingTeamProb: 50,
+                teamAProb: 50,
+                teamBProb: 50,
+                teamAName: match.teamAName,
+                teamBName: match.teamBName,
+                teamAColor: match.teamAColor || '#16a34a',
+                teamBColor: match.teamBColor || '#0f172a',
+                runsRequired: isSecondInnings && inn.target ? Math.max(0, inn.target - inn.totalRuns) : null,
+                ballsRemaining: isSecondInnings ? totalBalls : null,
+                requiredRunRate: isSecondInnings && inn.target ? (inn.target / totalOvers) : null,
+                currentRunRate: 0.0,
+                equationText: isSecondInnings && inn.target ? `Target: ${inn.target} (${totalOvers} ov)` : 'Match ready to begin'
+            };
+        }
+
+        let battingProb = 50;
+        let equationText = '';
+        const crr = inn.runRate;
+        const wicketsLost = inn.totalWickets;
+        const wicketsInHand = Math.max(0, 10 - wicketsLost);
+        const ballsBowled = inn.legalBalls;
+        const ballsRemaining = Math.max(0, totalBalls - ballsBowled);
+
+        if (!isSecondInnings) {
+            // --- 1ST INNINGS ESTIMATION MODEL ---
+            const parRPO = 8.2;
+            const parTotal = totalOvers * parRPO;
+            const oversRemaining = ballsRemaining / 6;
+            const wicketPowerFactor = Math.pow(wicketsInHand / 10, 0.45);
+            const projectedRuns = inn.totalRuns + (oversRemaining * parRPO * wicketPowerFactor);
+
+            const projectedDiff = projectedRuns - parTotal;
+            battingProb = 50 + (projectedDiff * 0.65);
+
+            // Recent momentum (last 6 balls)
+            const recent6 = (inn.ballLog || []).slice(-6);
+            const recentBoundaries = recent6.filter(d => d.runsOffBat >= 4).length;
+            const recentWickets = recent6.filter(d => d.isWicket).length;
+            battingProb += (recentBoundaries * 1.5) - (recentWickets * 4.0);
+
+            battingProb = Math.min(88, Math.max(12, battingProb));
+            equationText = `Projected Total: ~${Math.round(projectedRuns)} (CRR: ${this.formatStat(crr)})`;
+        } else {
+            // --- 2ND INNINGS CHASE ESTIMATION MODEL ---
+            const target = inn.target || (match.firstInnings ? match.firstInnings.totalRuns + 1 : 150);
+            const runsNeeded = Math.max(0, target - inn.totalRuns);
+            const rrr = this.calculateRequiredRunRate(target, inn.totalRuns, totalOvers, inn.oversBowled) || 0;
+
+            if (runsNeeded <= 0) {
+                battingProb = 100;
+                equationText = `${battingTeamName} won`;
+            } else if (wicketsInHand <= 0 || (ballsRemaining <= 0 && runsNeeded > 0)) {
+                battingProb = 0;
+                equationText = `${bowlingTeamName} won`;
+            } else {
+                const runsPerBall = runsNeeded / (ballsRemaining > 0 ? ballsRemaining : 1);
+                const wicketFactor = Math.pow(wicketsInHand / 10, 0.70);
+
+                if (runsPerBall <= 0.8) {
+                    battingProb = 75 + (0.8 - runsPerBall) * 20 + (wicketsInHand * 1.0);
+                } else if (runsPerBall <= 1.2) {
+                    battingProb = 55 + (1.2 - runsPerBall) * 50 * wicketFactor;
+                } else if (runsPerBall <= 1.8) {
+                    battingProb = 45 - (runsPerBall - 1.2) * 40 * (1.2 - wicketFactor);
+                } else if (runsPerBall <= 2.5) {
+                    battingProb = 25 - (runsPerBall - 1.8) * 25 * (1.2 - wicketFactor);
+                } else {
+                    battingProb = Math.max(1, (12 - (runsPerBall - 2.5) * 8) * wicketFactor);
+                }
+
+                if (rrr > 12 && wicketsInHand <= 3) {
+                    battingProb = Math.max(2, battingProb * 0.4);
+                } else if (rrr > 18) {
+                    battingProb = Math.max(1, battingProb * 0.3);
+                }
+
+                const recent6 = (inn.ballLog || []).slice(-6);
+                const recentBoundaries = recent6.filter(d => d.runsOffBat >= 4).length;
+                const recentWickets = recent6.filter(d => d.isWicket).length;
+                battingProb += (recentBoundaries * 2.0) - (recentWickets * 6.0);
+
+                battingProb = Math.min(99, Math.max(1, battingProb));
+                equationText = `Need ${runsNeeded} runs in ${ballsRemaining} balls (RRR: ${this.formatStat(rrr)})`;
+            }
+        }
+
+        battingProb = Math.round(battingProb);
+        const bowlingProb = 100 - battingProb;
+
+        const isBatTeamA = inn.battingTeamId === match.teamAId;
+        const teamAProb = isBatTeamA ? battingProb : bowlingProb;
+        const teamBProb = isBatTeamA ? bowlingProb : battingProb;
+
+        return {
+            battingTeamId: inn.battingTeamId,
+            bowlingTeamId: inn.bowlingTeamId,
+            battingTeamName,
+            bowlingTeamName,
+            battingTeamProb: battingProb,
+            bowlingTeamProb: bowlingProb,
+            teamAProb,
+            teamBProb,
+            teamAName: match.teamAName,
+            teamBName: match.teamBName,
+            teamAColor: match.teamAColor || '#16a34a',
+            teamBColor: match.teamBColor || '#0f172a',
+            runsRequired: isSecondInnings && inn.target ? Math.max(0, inn.target - inn.totalRuns) : null,
+            ballsRemaining: isSecondInnings ? Math.max(0, (totalOvers * 6) - inn.legalBalls) : null,
+            requiredRunRate: isSecondInnings && inn.target ? this.calculateRequiredRunRate(inn.target, inn.totalRuns, totalOvers, inn.oversBowled) : null,
+            currentRunRate: crr,
+            equationText
+        };
+    },
+
+    /**
      * DERIVE COMPLETE SCORECARD FROM UNDERLYING BALL DELIVERIES
      * Ensures absolute data integrity by deriving batsman scores, bowler figures,
      * fall of wickets, partnerships, extras, and match totals directly from ballLog.
+     * Always resolves actual player names from Player ID database.
      */
-    deriveScorecardFromDeliveries(innings) {
+    deriveScorecardFromDeliveries(innings, match = null) {
         if (!innings) return;
 
         const ballLog = innings.ballLog || [];
@@ -125,12 +306,17 @@ const ScoreshCalculations = {
         let totalWickets = 0;
         let legalBalls = 0;
 
-        // Initialize existing registered batsmen & bowlers
+        // Initialize existing registered batsmen & bowlers, resolving real names
         (innings.batsmen || []).forEach(b => {
-            batMap[b.id] = {
-                id: b.id,
-                playerId: b.playerId,
-                name: b.name,
+            const pId = b.playerId || String(b.id).replace(/^bat_/, '');
+            const realPlr = typeof window !== 'undefined' && window.getPlayerById ? window.getPlayerById(pId) : null;
+            const resolvedName = realPlr ? realPlr.name : (b.name || '');
+
+            const key = pId;
+            batMap[key] = {
+                id: 'bat_' + pId,
+                playerId: pId,
+                name: resolvedName,
                 ones: 0,
                 twos: 0,
                 threes: 0,
@@ -142,16 +328,22 @@ const ScoreshCalculations = {
                 dismissalType: 'Not Out',
                 bowlerName: '',
                 fielderName: '',
-                isOnStrike: b.isOnStrike,
-                isNonStriker: b.isNonStriker
+                wicketkeeperName: '',
+                isOnStrike: (pId === innings.strikerId),
+                isNonStriker: (pId === innings.nonStrikerId)
             };
         });
 
         (innings.bowlers || []).forEach(bw => {
-            bowlMap[bw.id] = {
-                id: bw.id,
-                playerId: bw.playerId,
-                name: bw.name,
+            const pId = bw.playerId || String(bw.id).replace(/^bowl_/, '');
+            const realPlr = typeof window !== 'undefined' && window.getPlayerById ? window.getPlayerById(pId) : null;
+            const resolvedName = realPlr ? realPlr.name : (bw.name || '');
+
+            const key = pId;
+            bowlMap[key] = {
+                id: 'bowl_' + pId,
+                playerId: pId,
+                name: resolvedName,
                 runsgv: 0,
                 legalBalls: 0,
                 overs: 0.0,
@@ -160,43 +352,51 @@ const ScoreshCalculations = {
                 wides: 0,
                 noBalls: 0,
                 dots: 0,
-                isCurrentBowler: bw.isCurrentBowler,
-                overRunsMap: {} // overIndex -> runs in that over
+                isCurrentBowler: (pId === innings.currentBowlerId),
+                overRunsMap: {}
             };
         });
 
         // Replay every delivery in order
         ballLog.forEach((d) => {
-            const strikerId = d.strikerId;
-            const nonStrikerId = d.nonStrikerId;
-            const bowlerId = d.bowlerId;
+            const strikerKey = d.strikerId ? String(d.strikerId).replace(/^bat_/, '') : null;
+            const bowlerKey = d.bowlerId ? String(d.bowlerId).replace(/^bowl_/, '') : null;
 
-            // Ensure striker is in batMap
-            if (strikerId && !batMap[strikerId]) {
-                batMap[strikerId] = {
-                    id: strikerId,
-                    playerId: d.strikerId,
-                    name: d.strikerName || 'Batter',
+            // Ensure striker is in batMap with real player name
+            if (strikerKey && !batMap[strikerKey]) {
+                const realPlr = typeof window !== 'undefined' && window.getPlayerById ? window.getPlayerById(strikerKey) : null;
+                const sName = realPlr ? realPlr.name : (d.strikerName || '');
+
+                batMap[strikerKey] = {
+                    id: 'bat_' + strikerKey,
+                    playerId: strikerKey,
+                    name: sName,
                     ones: 0, twos: 0, threes: 0, fours: 0, sixes: 0, balls: 0,
                     isOut: false, dismissal: 'Not Out', dismissalType: 'Not Out',
-                    bowlerName: '', fielderName: '', isOnStrike: true, isNonStriker: false
+                    bowlerName: '', fielderName: '', wicketkeeperName: '',
+                    isOnStrike: (strikerKey === innings.strikerId),
+                    isNonStriker: (strikerKey === innings.nonStrikerId)
                 };
             }
 
-            // Ensure bowler is in bowlMap
-            if (bowlerId && !bowlMap[bowlerId]) {
-                bowlMap[bowlerId] = {
-                    id: bowlerId,
-                    playerId: d.bowlerId,
-                    name: d.bowlerName || 'Bowler',
+            // Ensure bowler is in bowlMap with real player name
+            if (bowlerKey && !bowlMap[bowlerKey]) {
+                const realPlr = typeof window !== 'undefined' && window.getPlayerById ? window.getPlayerById(bowlerKey) : null;
+                const bName = realPlr ? realPlr.name : (d.bowlerName || '');
+
+                bowlMap[bowlerKey] = {
+                    id: 'bowl_' + bowlerKey,
+                    playerId: bowlerKey,
+                    name: bName,
                     runsgv: 0, legalBalls: 0, overs: 0.0, wkttkn: 0, maidens: 0,
-                    wides: 0, noBalls: 0, dots: 0, isCurrentBowler: true,
+                    wides: 0, noBalls: 0, dots: 0,
+                    isCurrentBowler: (bowlerKey === innings.currentBowlerId),
                     overRunsMap: {}
                 };
             }
 
-            const bat = batMap[strikerId];
-            const bowl = bowlMap[bowlerId];
+            const bat = strikerKey ? batMap[strikerKey] : null;
+            const bowl = bowlerKey ? bowlMap[bowlerKey] : null;
 
             // 1. Extras tracking
             const extraWide = d.extras?.wide || 0;
@@ -226,7 +426,7 @@ const ScoreshCalculations = {
 
             // 3. Bowler statistics
             if (bowl) {
-                const bowlerRuns = d.runsOffBat + extraWide + extraNoball; // Byes & Leg Byes don't count against bowler
+                const bowlerRuns = d.runsOffBat + extraWide + extraNoball;
                 bowl.runsgv += bowlerRuns;
 
                 if (!bowl.overRunsMap[d.overIndex]) bowl.overRunsMap[d.overIndex] = 0;
@@ -241,7 +441,7 @@ const ScoreshCalculations = {
                 }
             }
 
-            // 4. Legal Deliveries & Overs
+            // 4. Legal Deliveries
             if (d.isLegal) {
                 legalBalls += 1;
             }
@@ -253,19 +453,41 @@ const ScoreshCalculations = {
             // 6. Dismissal / Wickets
             if (d.isWicket) {
                 totalWickets += 1;
-                const dismissalDesc = d.dismissalDesc || (d.wicketType === 'Bowled' ? `b ${d.bowlerName}` : (d.wicketType === 'Caught' ? `c ${d.fielderName} b ${d.bowlerName}` : `out (${d.wicketType})`));
 
-                if (bat) {
-                    bat.isOut = true;
-                    bat.dismissal = dismissalDesc;
-                    bat.dismissalType = d.wicketType;
-                    bat.bowlerName = d.bowlerName;
-                    bat.fielderName = d.fielderName;
-                    bat.isOnStrike = false;
+                const rawDismissedId = d.dismissedPlayerId || strikerKey;
+                const dismissedKey = rawDismissedId ? String(rawDismissedId).replace(/^bat_/, '') : null;
+                const dismissedBat = dismissedKey ? batMap[dismissedKey] : bat;
+
+                let dismissalNotation = '';
+                const type = d.dismissalType || 'Bowled';
+
+                const bName = bowl ? bowl.name : (d.bowlerName || '');
+                const fName = d.fielderName || '';
+                const wkName = d.wicketkeeperName || d.fielderName || '';
+
+                if (type === 'Bowled') dismissalNotation = `b ${bName}`;
+                else if (type === 'Caught') dismissalNotation = `c ${fName} b ${bName}`;
+                else if (type === 'Caught & Bowled') dismissalNotation = `c & b ${bName}`;
+                else if (type === 'LBW') dismissalNotation = `lbw b ${bName}`;
+                else if (type === 'Run Out') dismissalNotation = `run out (${fName})`;
+                else if (type === 'Stumped') dismissalNotation = `st ${wkName} b ${bName}`;
+                else if (type === 'Hit Wicket') dismissalNotation = `hit wicket b ${bName}`;
+                else if (type === 'Retired Out') dismissalNotation = `retired out`;
+                else dismissalNotation = `out (${type})`;
+
+                if (dismissedBat) {
+                    dismissedBat.isOut = true;
+                    dismissedBat.dismissal = dismissalNotation;
+                    dismissedBat.dismissalType = type;
+                    dismissedBat.bowlerName = bName;
+                    dismissedBat.fielderName = fName;
+                    dismissedBat.wicketkeeperName = wkName;
+                    dismissedBat.isOnStrike = false;
+                    dismissedBat.isNonStriker = false;
                 }
 
-                // Bowler wicket attribution (Run Out does NOT credit bowler)
-                if (bowl && d.wicketType !== 'Run Out' && d.wicketType !== 'Retired Out') {
+                // Bowler wicket credit: Run Out & Retired Out do NOT credit bowler
+                if (bowl && type !== 'Run Out' && type !== 'Retired Out' && type !== 'Obstructing the Field') {
                     bowl.wkttkn += 1;
                 }
 
@@ -274,7 +496,7 @@ const ScoreshCalculations = {
                     wicketNumber: totalWickets,
                     runs: totalRuns,
                     overs: this.ballsToOversDisplay(legalBalls),
-                    batsmanName: d.strikerName
+                    batsmanName: dismissedBat ? dismissedBat.name : (d.dismissedPlayerName || d.strikerName)
                 });
 
                 // End partnership on wicket
@@ -298,13 +520,21 @@ const ScoreshCalculations = {
         // Compute Maidens and display overs for bowlers
         Object.values(bowlMap).forEach(b => {
             b.overs = parseFloat(this.ballsToOversDisplay(b.legalBalls));
-            // Check completed overs with 0 runs
             const fullOvers = Math.floor(b.legalBalls / 6);
             let maidens = 0;
             for (let ov = 0; ov < fullOvers; ov++) {
                 if (b.overRunsMap[ov] === 0) maidens++;
             }
             b.maidens = maidens;
+            b.isCurrentBowler = (b.playerId === innings.currentBowlerId);
+        });
+
+        // Set isOnStrike and isNonStriker strictly to match innings.strikerId and innings.nonStrikerId
+        Object.values(batMap).forEach(b => {
+            const isMatchStriker = (b.playerId === innings.strikerId || b.id === 'bat_' + innings.strikerId || b.id === innings.strikerId);
+            const isMatchNonStriker = (b.playerId === innings.nonStrikerId || b.id === 'bat_' + innings.nonStrikerId || b.id === innings.nonStrikerId);
+            b.isOnStrike = isMatchStriker && !b.isOut;
+            b.isNonStriker = isMatchNonStriker && !b.isOut;
         });
 
         // Set current active partnership
@@ -328,6 +558,35 @@ const ScoreshCalculations = {
 
         innings.batsmen = Object.values(batMap).map(b => new Batsman(b));
         innings.bowlers = Object.values(bowlMap).map(bw => new Bowler(bw));
+
+        // Update Winning Probability on match if match provided or active
+        const activeMatch = match || (typeof window !== 'undefined' && window.scoreState ? window.scoreState.activeMatch : null);
+        if (activeMatch) {
+            const prob = this.calculateWinningProbability(activeMatch, innings);
+            activeMatch.winProbability = prob;
+
+            if (!Array.isArray(activeMatch.probabilityHistory)) {
+                activeMatch.probabilityHistory = [];
+            }
+
+            const overStr = this.ballsToOversDisplay(legalBalls);
+            const lastSnap = activeMatch.probabilityHistory[activeMatch.probabilityHistory.length - 1];
+
+            if (!lastSnap || lastSnap.over !== overStr || lastSnap.inning !== innings.inningNumber) {
+                activeMatch.probabilityHistory.push({
+                    inning: innings.inningNumber,
+                    over: overStr,
+                    legalBalls,
+                    score: `${totalRuns}/${totalWickets}`,
+                    teamAProb: prob.teamAProb,
+                    teamBProb: prob.teamBProb,
+                    battingTeamProb: prob.battingTeamProb,
+                    bowlingTeamProb: prob.bowlingTeamProb,
+                    equationText: prob.equationText,
+                    timestamp: Date.now()
+                });
+            }
+        }
     },
 
     /**
@@ -350,125 +609,114 @@ const ScoreshCalculations = {
                 won: 0,
                 lost: 0,
                 tied: 0,
-                nr: 0,
+                noResult: 0,
                 points: 0,
                 runsScored: 0,
                 oversFacedBalls: 0,
                 runsConceded: 0,
                 oversBowledBalls: 0,
-                nrr: 0.0,
                 form: []
             };
         });
 
         const completedMatches = (tournament.matches || []).filter(m => m.status === 'completed');
 
-        completedMatches.forEach(match => {
-            const teamAId = match.teamAId;
-            const teamBId = match.teamBId;
-            const inn1 = match.innings[0];
-            const inn2 = match.innings[1];
-
-            if (!tableMap[teamAId] || !tableMap[teamBId]) return;
-
-            const tA = tableMap[teamAId];
-            const tB = tableMap[teamBId];
+        completedMatches.forEach(m => {
+            const tA = tableMap[m.teamAId];
+            const tB = tableMap[m.teamBId];
+            if (!tA || !tB) return;
 
             tA.played += 1;
             tB.played += 1;
 
-            if (match.winnerTeamId === teamAId) {
+            const inn1 = m.firstInnings;
+            const inn2 = m.secondInnings;
+
+            if (inn1 && inn2) {
+                const innA = inn1.battingTeamId === m.teamAId ? inn1 : inn2;
+                const innB = inn1.battingTeamId === m.teamBId ? inn1 : inn2;
+
+                if (innA) {
+                    tA.runsScored += innA.totalRuns;
+                    tA.oversFacedBalls += (innA.totalWickets >= 10 ? m.totalOvers * 6 : innA.legalBalls);
+                }
+                if (innB) {
+                    tB.runsScored += innB.totalRuns;
+                    tB.oversFacedBalls += (innB.totalWickets >= 10 ? m.totalOvers * 6 : innB.legalBalls);
+                }
+
+                if (innB) {
+                    tA.runsConceded += innB.totalRuns;
+                    tA.oversBowledBalls += (innB.totalWickets >= 10 ? m.totalOvers * 6 : innB.legalBalls);
+                }
+                if (innA) {
+                    tB.runsConceded += innA.totalRuns;
+                    tB.oversBowledBalls += (innA.totalWickets >= 10 ? m.totalOvers * 6 : innA.legalBalls);
+                }
+            }
+
+            if (m.winnerTeamId === m.teamAId) {
                 tA.won += 1;
                 tA.points += 2;
                 tA.form.push('W');
                 tB.lost += 1;
                 tB.form.push('L');
-            } else if (match.winnerTeamId === teamBId) {
+            } else if (m.winnerTeamId === m.teamBId) {
                 tB.won += 1;
                 tB.points += 2;
                 tB.form.push('W');
                 tA.lost += 1;
                 tA.form.push('L');
-            } else if (match.resultSummary && match.resultSummary.toLowerCase().includes('tie')) {
-                tA.tied += 1;
-                tB.tied += 1;
-                tA.points += 1;
-                tB.points += 1;
-                tA.form.push('T');
-                tB.form.push('T');
             } else {
-                tA.nr += 1;
-                tB.nr += 1;
+                tA.tied += 1;
                 tA.points += 1;
+                tA.form.push('T');
+                tB.tied += 1;
                 tB.points += 1;
-                tA.form.push('NR');
-                tB.form.push('NR');
-            }
-
-            // NRR Calculation
-            if (inn1 && inn2) {
-                const team1BatId = inn1.battingTeamId;
-                const team2BatId = inn2.battingTeamId;
-
-                const inn1Runs = inn1.totalRuns;
-                const inn1Balls = (inn1.totalWickets >= 10) ? (match.totalOvers * 6) : (inn1.legalBalls || (match.totalOvers * 6));
-
-                const inn2Runs = inn2.totalRuns;
-                const inn2Balls = (inn2.totalWickets >= 10) ? (match.totalOvers * 6) : (inn2.legalBalls || (match.totalOvers * 6));
-
-                if (tableMap[team1BatId]) {
-                    tableMap[team1BatId].runsScored += inn1Runs;
-                    tableMap[team1BatId].oversFacedBalls += Math.max(1, inn1Balls);
-                    tableMap[team1BatId].runsConceded += inn2Runs;
-                    tableMap[team1BatId].oversBowledBalls += Math.max(1, inn2Balls);
-                }
-
-                if (tableMap[team2BatId]) {
-                    tableMap[team2BatId].runsScored += inn2Runs;
-                    tableMap[team2BatId].oversFacedBalls += Math.max(1, inn2Balls);
-                    tableMap[team2BatId].runsConceded += inn1Runs;
-                    tableMap[team2BatId].oversBowledBalls += Math.max(1, inn1Balls);
-                }
+                tB.form.push('T');
             }
         });
 
-        const standings = Object.values(tableMap).map(team => {
-            const forRate = team.oversFacedBalls > 0 ? (team.runsScored / (team.oversFacedBalls / 6)) : 0;
-            const againstRate = team.oversBowledBalls > 0 ? (team.runsConceded / (team.oversBowledBalls / 6)) : 0;
-            team.nrr = forRate - againstRate;
-            return team;
+        const standings = Object.values(tableMap).map(row => {
+            const forOvFrac = row.oversFacedBalls > 0 ? (row.oversFacedBalls / 6) : 0;
+            const agOvFrac = row.oversBowledBalls > 0 ? (row.oversBowledBalls / 6) : 0;
+
+            const forRR = forOvFrac > 0 ? (row.runsScored / forOvFrac) : 0;
+            const agRR = agOvFrac > 0 ? (row.runsConceded / agOvFrac) : 0;
+            const nrr = forRR - agRR;
+
+            return {
+                ...row,
+                nrr: isNaN(nrr) ? 0.0 : nrr,
+                form: row.form.slice(-5)
+            };
         });
 
         standings.sort((a, b) => {
             if (b.points !== a.points) return b.points - a.points;
-            if (Math.abs(b.nrr - a.nrr) > 0.0001) return b.nrr - a.nrr;
             if (b.won !== a.won) return b.won - a.won;
-            return a.teamName.localeCompare(b.teamName);
+            return b.nrr - a.nrr;
         });
 
         return standings;
     },
 
     /**
-     * DYNAMIC TOURNAMENT RECORDS & STATS
+     * DYNAMIC TOURNAMENT RECORDS & LEADERBOARDS
      */
     computeTournamentStats(tournament) {
-        if (!tournament || !tournament.matches || tournament.matches.length === 0) {
+        if (!tournament) {
             return {
                 orangeCap: [],
                 purpleCap: [],
-                mostCatches: [],
                 highestScores: [],
-                bestStrikeRates: [],
                 mostSixes: [],
                 mostFours: [],
                 bestEconomy: [],
-                bestFigures: [],
-                teamTotals: [],
                 totalTournamentRuns: 0,
                 totalTournamentWickets: 0,
-                totalTournamentSixes: 0,
                 totalTournamentFours: 0,
+                totalTournamentSixes: 0,
                 centuriesCount: 0,
                 fiftiesCount: 0
             };
@@ -476,187 +724,134 @@ const ScoreshCalculations = {
 
         const playerBatMap = {};
         const playerBowlMap = {};
-        const playerFieldMap = {};
 
-        let totalTournamentRuns = 0;
-        let totalTournamentWickets = 0;
-        let totalTournamentSixes = 0;
-        let totalTournamentFours = 0;
-        let centuriesCount = 0;
-        let fiftiesCount = 0;
-        const highestIndividualInnings = [];
-        const bestBowlingInnings = [];
-        const teamTotals = [];
+        let totalTournRuns = 0;
+        let totalTournWkts = 0;
+        let totalTournFours = 0;
+        let totalTournSixes = 0;
+        let centuries = 0;
+        let fifties = 0;
 
-        tournament.matches.forEach(match => {
-            match.innings.forEach(inn => {
-                totalTournamentRuns += inn.totalRuns;
-                totalTournamentWickets += inn.totalWickets;
+        (tournament.matches || []).forEach(match => {
+            (match.innings || []).forEach(inn => {
+                // Batting stats
+                (inn.batsmen || []).forEach(b => {
+                    const pId = b.playerId || String(b.id).replace(/^bat_/, '');
+                    const realPlr = typeof window !== 'undefined' && window.getPlayerById ? window.getPlayerById(pId) : null;
+                    const pName = realPlr ? realPlr.name : b.name;
 
-                if (inn.totalRuns > 0) {
-                    teamTotals.push({
-                        teamName: inn.battingTeamName,
-                        runs: inn.totalRuns,
-                        wickets: inn.totalWickets,
-                        overs: inn.displayOvers,
-                        matchTitle: match.title,
-                        date: match.date
-                    });
-                }
-
-                // Aggregate Batting
-                inn.batsmen.forEach(bat => {
-                    if (!bat.name) return;
-                    const key = bat.playerId || bat.name;
-                    if (!playerBatMap[key]) {
-                        playerBatMap[key] = {
-                            playerId: bat.playerId,
-                            playerName: bat.name,
-                            inningsCount: 0,
+                    if (!playerBatMap[pId]) {
+                        playerBatMap[pId] = {
+                            playerId: pId,
+                            playerName: pName,
+                            innings: 0,
                             runs: 0,
                             balls: 0,
-                            ones: 0, twos: 0, threes: 0, fours: 0, sixes: 0,
-                            fifties: 0, centuries: 0, highestScore: 0, notOuts: 0
+                            fours: 0,
+                            sixes: 0,
+                            highestScore: 0,
+                            dismissals: 0,
+                            fifties: 0,
+                            centuries: 0
                         };
                     }
 
-                    const p = playerBatMap[key];
-                    if (bat.balls > 0 || bat.isOut) p.inningsCount += 1;
-                    p.runs += bat.runs;
-                    p.balls += bat.balls;
-                    p.ones += bat.ones;
-                    p.twos += bat.twos;
-                    p.threes += bat.threes;
-                    p.fours += bat.fours;
-                    p.sixes += bat.sixes;
-                    totalTournamentFours += bat.fours;
-                    totalTournamentSixes += bat.sixes;
+                    const rec = playerBatMap[pId];
+                    if (b.balls > 0 || b.runs > 0 || b.isOut) {
+                        rec.innings += 1;
+                        rec.runs += b.runs;
+                        rec.balls += b.balls;
+                        rec.fours += b.fours;
+                        rec.sixes += b.sixes;
 
-                    if (!bat.isOut) p.notOuts += 1;
-                    if (bat.runs >= 100) { p.centuries += 1; centuriesCount += 1; }
-                    else if (bat.runs >= 50) { p.fifties += 1; fiftiesCount += 1; }
-                    if (bat.runs > p.highestScore) p.highestScore = bat.runs;
+                        if (b.runs > rec.highestScore) rec.highestScore = b.runs;
+                        if (b.isOut) rec.dismissals += 1;
+                        if (b.runs >= 100) { rec.centuries += 1; centuries += 1; }
+                        else if (b.runs >= 50) { rec.fifties += 1; fifties += 1; }
 
-                    if (bat.runs > 0) {
-                        highestIndividualInnings.push({
-                            playerName: bat.name,
-                            runs: bat.runs,
-                            balls: bat.balls,
-                            strikeRate: bat.strikeRate,
-                            fours: bat.fours,
-                            sixes: bat.sixes,
-                            matchTitle: match.title,
-                            isOut: bat.isOut
-                        });
+                        totalTournRuns += b.runs;
+                        totalTournFours += b.fours;
+                        totalTournSixes += b.sixes;
                     }
                 });
 
-                // Aggregate Bowling
-                inn.bowlers.forEach(bowl => {
-                    if (!bowl.name) return;
-                    const key = bowl.playerId || bowl.name;
-                    if (!playerBowlMap[key]) {
-                        playerBowlMap[key] = {
-                            playerId: bowl.playerId,
-                            playerName: bowl.name,
-                            inningsCount: 0,
-                            oversBalls: 0,
-                            runsConceded: 0,
-                            wickets: 0,
+                // Bowling stats
+                (inn.bowlers || []).forEach(bw => {
+                    const pId = bw.playerId || String(bw.id).replace(/^bowl_/, '');
+                    const realPlr = typeof window !== 'undefined' && window.getPlayerById ? window.getPlayerById(pId) : null;
+                    const pName = realPlr ? realPlr.name : bw.name;
+
+                    if (!playerBowlMap[pId]) {
+                        playerBowlMap[pId] = {
+                            playerId: pId,
+                            playerName: pName,
+                            innings: 0,
+                            legalBalls: 0,
+                            runsgv: 0,
+                            wkttkn: 0,
                             maidens: 0,
                             bestWkts: 0,
                             bestRuns: 999
                         };
                     }
 
-                    const b = playerBowlMap[key];
-                    if (bowl.overs > 0) b.inningsCount += 1;
-                    b.oversBalls += bowl.totalLegalBalls;
-                    b.runsConceded += bowl.runsgv;
-                    b.wickets += bowl.wkttkn;
-                    b.maidens += bowl.maidens;
+                    const rec = playerBowlMap[pId];
+                    if (bw.legalBalls > 0 || bw.runsgv > 0 || bw.wkttkn > 0) {
+                        rec.innings += 1;
+                        rec.legalBalls += bw.legalBalls;
+                        rec.runsgv += bw.runsgv;
+                        rec.wkttkn += bw.wkttkn;
+                        rec.maidens += bw.maidens;
 
-                    if (bowl.wkttkn > b.bestWkts || (bowl.wkttkn === b.bestWkts && bowl.runsgv < b.bestRuns)) {
-                        b.bestWkts = bowl.wkttkn;
-                        b.bestRuns = bowl.runsgv;
-                    }
-
-                    if (bowl.overs > 0) {
-                        bestBowlingInnings.push({
-                            playerName: bowl.name,
-                            overs: bowl.overs,
-                            runs: bowl.runsgv,
-                            wickets: bowl.wkttkn,
-                            economy: bowl.economy,
-                            matchTitle: match.title
-                        });
-                    }
-                });
-
-                // Aggregate Fielding (Catches & Run Outs)
-                (inn.ballLog || []).forEach(d => {
-                    if (d.isWicket && (d.wicketType === 'Caught' || d.wicketType === 'Stumped' || d.wicketType === 'Run Out')) {
-                        const fielder = d.fielderName;
-                        if (fielder) {
-                            if (!playerFieldMap[fielder]) {
-                                playerFieldMap[fielder] = { playerName: fielder, catches: 0, stumpings: 0, runouts: 0, total: 0 };
-                            }
-                            if (d.wicketType === 'Caught') playerFieldMap[fielder].catches += 1;
-                            else if (d.wicketType === 'Stumped') playerFieldMap[fielder].stumpings += 1;
-                            else if (d.wicketType === 'Run Out') playerFieldMap[fielder].runouts += 1;
-                            playerFieldMap[fielder].total += 1;
+                        if (bw.wkttkn > rec.bestWkts || (bw.wkttkn === rec.bestWkts && bw.runsgv < rec.bestRuns)) {
+                            rec.bestWkts = bw.wkttkn;
+                            rec.bestRuns = bw.runsgv;
                         }
+
+                        totalTournWkts += bw.wkttkn;
                     }
                 });
             });
         });
 
-        const orangeCap = Object.values(playerBatMap).map(p => {
-            p.strikeRate = p.balls > 0 ? (p.runs / p.balls) * 100 : 0.0;
-            const dismissals = p.inningsCount - p.notOuts;
-            p.average = dismissals > 0 ? (p.runs / dismissals) : p.runs;
-            return p;
-        }).sort((a, b) => b.runs - a.runs || b.strikeRate - a.strikeRate);
+        // Orange Cap list
+        const orangeCap = Object.values(playerBatMap).map(p => ({
+            ...p,
+            strikeRate: p.balls > 0 ? (p.runs / p.balls) * 100 : 0.0,
+            average: p.dismissals > 0 ? (p.runs / p.dismissals) : p.runs
+        })).sort((a, b) => b.runs - a.runs || b.strikeRate - a.strikeRate);
 
-        const purpleCap = Object.values(playerBowlMap).map(b => {
-            const oversFraction = b.oversBalls / 6;
-            b.displayOvers = ScoreshCalculations.ballsToOversDisplay(b.oversBalls);
-            b.economy = oversFraction > 0 ? (b.runsConceded / oversFraction) : 0.0;
-            b.average = b.wickets > 0 ? (b.runsConceded / b.wickets) : 999.0;
-            return b;
-        }).sort((a, b) => b.wickets - a.wickets || a.economy - b.economy);
+        // Purple Cap list
+        const purpleCap = Object.values(playerBowlMap).map(p => {
+            const ovFrac = p.legalBalls / 6;
+            return {
+                ...p,
+                overs: (Math.floor(p.legalBalls / 6)) + '.' + (p.legalBalls % 6),
+                economy: ovFrac > 0 ? (p.runsgv / ovFrac) : 0.0
+            };
+        }).sort((a, b) => b.wkttkn - a.wkttkn || a.economy - b.economy);
 
-        const mostCatches = Object.values(playerFieldMap).sort((a, b) => b.total - a.total);
-        highestIndividualInnings.sort((a, b) => b.runs - a.runs || b.strikeRate - a.strikeRate);
-        const mostSixes = [...orangeCap].filter(p => p.sixes > 0).sort((a, b) => b.sixes - a.sixes);
-        const mostFours = [...orangeCap].filter(p => p.fours > 0).sort((a, b) => b.fours - a.fours);
-        const bestStrikeRates = [...orangeCap].filter(p => p.balls >= 10).sort((a, b) => b.strikeRate - a.strikeRate);
-        const bestEconomy = [...purpleCap].filter(b => b.oversBalls >= 12).sort((a, b) => a.economy - b.economy);
-        bestBowlingInnings.sort((a, b) => b.wickets - a.wickets || a.runs - b.runs);
-        teamTotals.sort((a, b) => b.runs - a.runs);
+        const highestScores = [...orangeCap].sort((a, b) => b.highestScore - a.highestScore);
+        const mostSixes = [...orangeCap].sort((a, b) => b.sixes - a.sixes);
+        const mostFours = [...orangeCap].sort((a, b) => b.fours - a.fours);
+        const bestEconomy = purpleCap.filter(p => p.legalBalls >= 6).sort((a, b) => a.economy - b.economy);
 
         return {
             orangeCap,
             purpleCap,
-            mostCatches,
-            highestScores: highestIndividualInnings,
-            bestStrikeRates,
+            highestScores,
             mostSixes,
             mostFours,
             bestEconomy,
-            bestFigures: bestBowlingInnings,
-            teamTotals,
-            totalTournamentRuns,
-            totalTournamentWickets,
-            totalTournamentSixes,
-            totalTournamentFours,
-            centuriesCount,
-            fiftiesCount
+            totalTournamentRuns: totalTournRuns,
+            totalTournamentWickets: totalTournWkts,
+            totalTournamentFours: totalTournFours,
+            totalTournamentSixes: totalTournSixes,
+            centuriesCount: centuries,
+            fiftiesCount: fifties
         };
     }
 };
 
-// Export to window
-if (typeof window !== 'undefined') {
-    window.ScoreshCalculations = ScoreshCalculations;
-}
+// Global Calculations instance
+window.ScoreshCalculations = ScoreshCalculations;

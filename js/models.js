@@ -1,9 +1,9 @@
 /**
  * Scoresh Data Models
- * Clean, hierarchical cricket data models for multi-tournament management.
+ * Clean, hierarchical cricket data models for dynamic tournament management.
  * Preserves C struct mathematical logic for Batsman and Bowler statistics while supporting
- * complete dynamic leagues, Playing XI rosters, delivery-derived scorecards, and partnerships.
- * Hierarchy: Tournament -> Teams -> Players -> Matches -> Innings -> Deliveries -> Derived Scorecards
+ * complete dynamic leagues, strict 11-20 player squad management, Playing XI rosters,
+ * player-ID-driven match states (strikerId, nonStrikerId, currentBowlerId), and delivery-derived scorecards.
  */
 
 class Player {
@@ -15,7 +15,11 @@ class Player {
         jersey = '',
         role = 'Batsman', // 'Batsman' | 'Bowler' | 'All-rounder' | 'Wicketkeeper'
         battingStyle = 'Right-hand bat',
-        bowlingStyle = 'Right-arm medium'
+        bowlingStyle = 'Right-arm medium',
+        isWicketkeeper = false,
+        isCaptain = false,
+        isViceCaptain = false,
+        profileImage = ''
     } = {}) {
         this.id = id || 'plr_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5);
         this.tournamentId = tournamentId;
@@ -25,6 +29,10 @@ class Player {
         this.role = role || 'Batsman';
         this.battingStyle = battingStyle || 'Right-hand bat';
         this.bowlingStyle = bowlingStyle || 'Right-arm medium';
+        this.isWicketkeeper = Boolean(isWicketkeeper || role === 'Wicketkeeper');
+        this.isCaptain = Boolean(isCaptain);
+        this.isViceCaptain = Boolean(isViceCaptain);
+        this.profileImage = profileImage || '';
     }
 
     toJSON() {
@@ -36,7 +44,11 @@ class Player {
             jersey: this.jersey,
             role: this.role,
             battingStyle: this.battingStyle,
-            bowlingStyle: this.bowlingStyle
+            bowlingStyle: this.bowlingStyle,
+            isWicketkeeper: this.isWicketkeeper,
+            isCaptain: this.isCaptain,
+            isViceCaptain: this.isViceCaptain,
+            profileImage: this.profileImage
         };
     }
 }
@@ -50,6 +62,8 @@ class Team {
         color = '#16a34a',
         logo = '',
         captainId = null,
+        viceCaptainId = null,
+        wicketkeeperIds = [],
         playerIds = []
     } = {}) {
         this.id = id || 'team_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5);
@@ -59,7 +73,17 @@ class Team {
         this.color = color || '#16a34a';
         this.logo = logo || '';
         this.captainId = captainId;
+        this.viceCaptainId = viceCaptainId;
+        this.wicketkeeperIds = Array.isArray(wicketkeeperIds) ? [...wicketkeeperIds] : [];
         this.playerIds = Array.isArray(playerIds) ? [...playerIds] : [];
+    }
+
+    get playerCount() {
+        return this.playerIds.length;
+    }
+
+    get isValidSquad() {
+        return this.playerIds.length >= 11 && this.playerIds.length <= 20;
     }
 
     toJSON() {
@@ -71,6 +95,8 @@ class Team {
             color: this.color,
             logo: this.logo,
             captainId: this.captainId,
+            viceCaptainId: this.viceCaptainId,
+            wicketkeeperIds: [...this.wicketkeeperIds],
             playerIds: [...this.playerIds]
         };
     }
@@ -92,11 +118,12 @@ class Batsman {
         dismissalType = 'Not Out',
         bowlerName = '',
         fielderName = '',
+        wicketkeeperName = '',
         isOnStrike = false,
         isNonStriker = false
     } = {}) {
-        this.id = id || 'bat_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5);
-        this.playerId = playerId;
+        this.id = id || (playerId ? 'bat_' + playerId : 'bat_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5));
+        this.playerId = playerId || (id ? String(id).replace(/^bat_/, '') : null);
         this.name = (name || '').trim();
         this.ones = Math.max(0, parseInt(ones, 10) || 0);
         this.twos = Math.max(0, parseInt(twos, 10) || 0);
@@ -109,6 +136,7 @@ class Batsman {
         this.dismissalType = dismissalType || (this.isOut ? 'Bowled' : 'Not Out');
         this.bowlerName = bowlerName || '';
         this.fielderName = fielderName || '';
+        this.wicketkeeperName = wicketkeeperName || '';
         this.isOnStrike = Boolean(isOnStrike);
         this.isNonStriker = Boolean(isNonStriker);
     }
@@ -162,6 +190,7 @@ class Batsman {
             dismissalType: this.dismissalType,
             bowlerName: this.bowlerName,
             fielderName: this.fielderName,
+            wicketkeeperName: this.wicketkeeperName,
             isOnStrike: this.isOnStrike,
             isNonStriker: this.isNonStriker
         };
@@ -181,8 +210,8 @@ class Bowler {
         noBalls = 0,
         isCurrentBowler = false
     } = {}) {
-        this.id = id || 'bowl_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5);
-        this.playerId = playerId;
+        this.id = id || (playerId ? 'bowl_' + playerId : 'bowl_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5));
+        this.playerId = playerId || (id ? String(id).replace(/^bowl_/, '') : null);
         this.name = (name || '').trim();
         this.runsgv = Math.max(0, parseInt(runsgv, 10) || 0);
         this.overs = Math.max(0, parseFloat(overs) || 0);
@@ -209,9 +238,9 @@ class Bowler {
      * C Program Formula: Economy = Runs Conceded / Overs
      */
     get economy() {
-        const oversFraction = this.exactOversFraction;
-        if (oversFraction === 0) return 0.0;
-        return this.runsgv / oversFraction;
+        const ovFrac = this.exactOversFraction;
+        if (ovFrac === 0) return 0.0;
+        return this.runsgv / ovFrac;
     }
 
     toJSON() {
@@ -233,6 +262,8 @@ class Bowler {
 class Delivery {
     constructor({
         id = null,
+        matchId = null,
+        inningsId = null,
         overIndex = 0,
         ballInOver = 1,
         strikerId = null,
@@ -245,22 +276,28 @@ class Delivery {
         extras = { wide: 0, noball: 0, bye: 0, legbye: 0 },
         isLegal = true,
         isWicket = false,
-        wicketType = null, // 'Bowled' | 'Caught' | 'Run Out' | 'LBW' | 'Stumped' | 'Hit Wicket' | 'Retired Out'
+        dismissedPlayerId = null,
+        dismissedPlayerName = '',
+        dismissalType = null,
         fielderId = null,
         fielderName = '',
+        wicketkeeperId = null,
+        wicketkeeperName = '',
         dismissalDesc = '',
         autoCommentary = '',
         timestamp = Date.now()
     } = {}) {
-        this.id = id || 'del_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4);
+        this.id = id || 'deliv_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5);
+        this.matchId = matchId;
+        this.inningsId = inningsId;
         this.overIndex = parseInt(overIndex, 10) || 0;
         this.ballInOver = parseInt(ballInOver, 10) || 1;
         this.strikerId = strikerId;
-        this.strikerName = strikerName;
+        this.strikerName = strikerName || '';
         this.nonStrikerId = nonStrikerId;
-        this.nonStrikerName = nonStrikerName;
+        this.nonStrikerName = nonStrikerName || '';
         this.bowlerId = bowlerId;
-        this.bowlerName = bowlerName;
+        this.bowlerName = bowlerName || '';
         this.runsOffBat = parseInt(runsOffBat, 10) || 0;
         this.extras = {
             wide: parseInt(extras?.wide, 10) || 0,
@@ -270,29 +307,35 @@ class Delivery {
         };
         this.isLegal = Boolean(isLegal);
         this.isWicket = Boolean(isWicket);
-        this.wicketType = wicketType;
+        this.dismissedPlayerId = dismissedPlayerId;
+        this.dismissedPlayerName = dismissedPlayerName || '';
+        this.dismissalType = dismissalType;
         this.fielderId = fielderId;
-        this.fielderName = fielderName;
+        this.fielderName = fielderName || '';
+        this.wicketkeeperId = wicketkeeperId;
+        this.wicketkeeperName = wicketkeeperName || '';
         this.dismissalDesc = dismissalDesc || '';
         this.autoCommentary = autoCommentary || '';
-        this.timestamp = timestamp;
+        this.timestamp = timestamp || Date.now();
     }
 
     get totalRuns() {
         return this.runsOffBat + this.extras.wide + this.extras.noball + this.extras.bye + this.extras.legbye;
     }
 
-    get isExtra() {
-        return (this.extras.wide > 0 || this.extras.noball > 0 || this.extras.bye > 0 || this.extras.legbye > 0);
-    }
-
     get displayOverNumber() {
         return `${this.overIndex}.${this.ballInOver}`;
+    }
+
+    get isExtra() {
+        return (this.extras.wide > 0 || this.extras.noball > 0 || this.extras.bye > 0 || this.extras.legbye > 0);
     }
 
     toJSON() {
         return {
             id: this.id,
+            matchId: this.matchId,
+            inningsId: this.inningsId,
             overIndex: this.overIndex,
             ballInOver: this.ballInOver,
             strikerId: this.strikerId,
@@ -305,9 +348,13 @@ class Delivery {
             extras: { ...this.extras },
             isLegal: this.isLegal,
             isWicket: this.isWicket,
-            wicketType: this.wicketType,
+            dismissedPlayerId: this.dismissedPlayerId,
+            dismissedPlayerName: this.dismissedPlayerName,
+            dismissalType: this.dismissalType,
             fielderId: this.fielderId,
             fielderName: this.fielderName,
+            wicketkeeperId: this.wicketkeeperId,
+            wicketkeeperName: this.wicketkeeperName,
             dismissalDesc: this.dismissalDesc,
             autoCommentary: this.autoCommentary,
             timestamp: this.timestamp
@@ -318,47 +365,55 @@ class Delivery {
 class Innings {
     constructor({
         id = null,
+        matchId = null,
         inningNumber = 1,
         battingTeamId = null,
         bowlingTeamId = null,
         battingTeamName = '',
         bowlingTeamName = '',
-        totalRuns = 0,
-        totalWickets = 0,
-        oversBowled = 0.0,
-        legalBalls = 0,
-        target = null,
-        isCompleted = false,
-        extras = { wides: 0, noBalls: 0, byes: 0, legByes: 0 },
+        strikerId = null,
+        nonStrikerId = null,
+        currentBowlerId = null,
         batsmen = [],
         bowlers = [],
         ballLog = [],
         fallOfWickets = [],
-        partnerships = []
+        partnerships = [],
+        extras = { wides: 0, noBalls: 0, byes: 0, legByes: 0 },
+        totalRuns = 0,
+        totalWickets = 0,
+        legalBalls = 0,
+        oversBowled = 0.0,
+        isCompleted = false,
+        target = null
     } = {}) {
-        this.id = id || 'inn_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4);
+        this.id = id || 'inn_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5);
+        this.matchId = matchId;
         this.inningNumber = parseInt(inningNumber, 10) || 1;
         this.battingTeamId = battingTeamId;
         this.bowlingTeamId = bowlingTeamId;
         this.battingTeamName = battingTeamName || '';
         this.bowlingTeamName = bowlingTeamName || '';
-        this.totalRuns = parseInt(totalRuns, 10) || 0;
-        this.totalWickets = parseInt(totalWickets, 10) || 0;
-        this.oversBowled = parseFloat(oversBowled) || 0.0;
-        this.legalBalls = parseInt(legalBalls, 10) || 0;
-        this.target = target !== null && target !== undefined ? parseInt(target, 10) : null;
-        this.isCompleted = Boolean(isCompleted);
-        this.extras = {
-            wides: Math.max(0, parseInt(extras?.wides, 10) || 0),
-            noBalls: Math.max(0, parseInt(extras?.noBalls, 10) || 0),
-            byes: Math.max(0, parseInt(extras?.byes, 10) || 0),
-            legByes: Math.max(0, parseInt(extras?.legByes, 10) || 0)
-        };
+        this.strikerId = strikerId;
+        this.nonStrikerId = nonStrikerId;
+        this.currentBowlerId = currentBowlerId;
         this.batsmen = Array.isArray(batsmen) ? batsmen.map(b => b instanceof Batsman ? b : new Batsman(b)) : [];
-        this.bowlers = Array.isArray(bowlers) ? bowlers.map(b => b instanceof Bowler ? b : new Bowler(b)) : [];
-        this.ballLog = Array.isArray(ballLog) ? ballLog.map(b => b instanceof Delivery ? b : new Delivery(b)) : [];
+        this.bowlers = Array.isArray(bowlers) ? bowlers.map(bw => bw instanceof Bowler ? bw : new Bowler(bw)) : [];
+        this.ballLog = Array.isArray(ballLog) ? ballLog.map(d => d instanceof Delivery ? d : new Delivery(d)) : [];
         this.fallOfWickets = Array.isArray(fallOfWickets) ? [...fallOfWickets] : [];
         this.partnerships = Array.isArray(partnerships) ? [...partnerships] : [];
+        this.extras = {
+            wides: parseInt(extras?.wides, 10) || 0,
+            noBalls: parseInt(extras?.noBalls, 10) || 0,
+            byes: parseInt(extras?.byes, 10) || 0,
+            legByes: parseInt(extras?.legByes, 10) || 0
+        };
+        this.totalRuns = parseInt(totalRuns, 10) || 0;
+        this.totalWickets = parseInt(totalWickets, 10) || 0;
+        this.legalBalls = parseInt(legalBalls, 10) || 0;
+        this.oversBowled = parseFloat(oversBowled) || 0.0;
+        this.isCompleted = Boolean(isCompleted);
+        this.target = target ? parseInt(target, 10) : null;
     }
 
     get totalExtras() {
@@ -371,35 +426,42 @@ class Innings {
         return `${fullOvers}.${remBalls}`;
     }
 
-    get exactOversFraction() {
-        return this.legalBalls / 6;
+    get oversFraction() {
+        const fullOvers = Math.floor(this.legalBalls / 6);
+        const remBalls = this.legalBalls % 6;
+        return fullOvers + (remBalls / 6);
     }
 
     get runRate() {
-        if (this.legalBalls === 0) return 0.0;
-        return this.totalRuns / (this.legalBalls / 6);
+        const ov = this.oversFraction;
+        if (ov === 0) return 0.0;
+        return this.totalRuns / ov;
     }
 
     toJSON() {
         return {
             id: this.id,
+            matchId: this.matchId,
             inningNumber: this.inningNumber,
             battingTeamId: this.battingTeamId,
             bowlingTeamId: this.bowlingTeamId,
             battingTeamName: this.battingTeamName,
             bowlingTeamName: this.bowlingTeamName,
+            strikerId: this.strikerId,
+            nonStrikerId: this.nonStrikerId,
+            currentBowlerId: this.currentBowlerId,
+            batsmen: this.batsmen.map(b => b.toJSON()),
+            bowlers: this.bowlers.map(bw => bw.toJSON()),
+            ballLog: this.ballLog.map(d => d.toJSON()),
+            fallOfWickets: [...this.fallOfWickets],
+            partnerships: [...this.partnerships],
+            extras: { ...this.extras },
             totalRuns: this.totalRuns,
             totalWickets: this.totalWickets,
-            oversBowled: this.oversBowled,
             legalBalls: this.legalBalls,
-            target: this.target,
+            oversBowled: this.oversBowled,
             isCompleted: this.isCompleted,
-            extras: { ...this.extras },
-            batsmen: this.batsmen.map(b => b.toJSON()),
-            bowlers: this.bowlers.map(b => b.toJSON()),
-            ballLog: this.ballLog.map(b => b.toJSON()),
-            fallOfWickets: [...this.fallOfWickets],
-            partnerships: [...this.partnerships]
+            target: this.target
         };
     }
 }
@@ -420,20 +482,24 @@ class Match {
         teamAPlayingXI = [],
         teamBPlayingXI = [],
         date = '',
-        time = '',
-        venue = '',
+        time = '14:00',
+        venue = 'Main Cricket Ground',
         matchFormat = 'T20',
         totalOvers = 20,
         status = 'upcoming', // 'upcoming' | 'live' | 'completed' | 'abandoned'
         tossWinnerId = null,
-        tossDecision = 'Bat', // 'Bat' | 'Bowl'
+        tossDecision = 'Bat',
         umpires = '',
         currentInningIndex = 0,
         innings = [],
         resultSummary = '',
         winnerTeamId = null,
         playerOfTheMatch = '',
-        lastBowlerId = null
+        customSummaryText = '',
+        keyMoments = '',
+        lastBowlerId = null,
+        probabilityHistory = [],
+        winProbability = null
     } = {}) {
         this.id = id || 'match_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5);
         this.tournamentId = tournamentId;
@@ -467,7 +533,11 @@ class Match {
         this.resultSummary = resultSummary || '';
         this.winnerTeamId = winnerTeamId;
         this.playerOfTheMatch = playerOfTheMatch || '';
+        this.customSummaryText = customSummaryText || '';
+        this.keyMoments = keyMoments || '';
         this.lastBowlerId = lastBowlerId;
+        this.probabilityHistory = Array.isArray(probabilityHistory) ? [...probabilityHistory] : [];
+        this.winProbability = winProbability || null;
     }
 
     get currentInnings() {
@@ -511,7 +581,11 @@ class Match {
             resultSummary: this.resultSummary,
             winnerTeamId: this.winnerTeamId,
             playerOfTheMatch: this.playerOfTheMatch,
-            lastBowlerId: this.lastBowlerId
+            customSummaryText: this.customSummaryText,
+            keyMoments: this.keyMoments,
+            lastBowlerId: this.lastBowlerId,
+            probabilityHistory: [...this.probabilityHistory],
+            winProbability: this.winProbability
         };
     }
 }
@@ -522,7 +596,7 @@ class Tournament {
         hostId = null,
         hostName = '',
         name = '',
-        logo = '',
+        logo = '🏆',
         description = '',
         format = 'T20', // 'T10' | 'T20' | 'ODI' | 'Test' | 'Custom'
         overs = 20,
@@ -541,7 +615,7 @@ class Tournament {
         this.hostId = hostId;
         this.hostName = hostName || 'Organizer';
         this.name = (name || '').trim();
-        this.logo = logo || '';
+        this.logo = logo || '🏆';
         this.description = description || '';
         this.format = format || 'T20';
         this.overs = parseInt(overs, 10) || (format === 'T10' ? 10 : format === 'T20' ? 20 : format === 'ODI' ? 50 : 20);
@@ -558,14 +632,24 @@ class Tournament {
     }
 
     getTeam(teamId) {
-        return this.teams.find(t => t.id === teamId);
+        if (!teamId) return null;
+        return this.teams.find(t => t.id === teamId) || null;
     }
 
+    /**
+     * Robust player lookup supporting plain IDs and prefixed IDs (e.g. bat_plr_1, bowl_plr_1)
+     */
     getPlayer(playerId) {
-        return this.players.find(p => p.id === playerId);
+        if (!playerId) return null;
+        const cleanId = String(playerId).replace(/^bat_/, '').replace(/^bowl_/, '');
+        return this.players.find(p => p.id === playerId || p.id === cleanId) || null;
     }
 
+    /**
+     * Strict Team Isolation: Retrieves ONLY players belonging to teamId
+     */
     getTeamPlayers(teamId) {
+        if (!teamId) return [];
         return this.players.filter(p => p.teamId === teamId);
     }
 
@@ -593,9 +677,34 @@ class Tournament {
     }
 }
 
+/**
+ * Universal Global Player Lookup Helper
+ */
+function getPlayerById(playerId) {
+    if (!playerId) return null;
+    const cleanId = String(playerId).replace(/^bat_/, '').replace(/^bowl_/, '');
+
+    if (typeof window !== 'undefined' && window.scoreState) {
+        const activeT = window.scoreState.activeTournament;
+        if (activeT && activeT.getPlayer) {
+            const p = activeT.getPlayer(playerId);
+            if (p) return p;
+        }
+
+        if (Array.isArray(window.scoreState.tournaments)) {
+            for (const t of window.scoreState.tournaments) {
+                if (t && t.getPlayer) {
+                    const p = t.getPlayer(playerId);
+                    if (p) return p;
+                }
+            }
+        }
+    }
+    return null;
+}
+
 // Export to window
 if (typeof window !== 'undefined') {
-    window.User = User;
     window.Player = Player;
     window.Team = Team;
     window.Batsman = Batsman;
@@ -604,4 +713,5 @@ if (typeof window !== 'undefined') {
     window.Innings = Innings;
     window.Match = Match;
     window.Tournament = Tournament;
+    window.getPlayerById = getPlayerById;
 }

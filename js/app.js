@@ -103,7 +103,7 @@ function setupScoringPad() {
             const customComm = commInput ? commInput.value.trim() : '';
 
             if (shot === 'W') {
-                // Open Dismissal Modal
+                // Open Structured Dismissal Modal
                 window.ScoreshModals.openWicketModal();
             } else if (shot === 'CHANGE_BOWLER') {
                 window.ScoreshModals.openChangeBowlerModal();
@@ -117,6 +117,21 @@ function setupScoringPad() {
             setTimeout(() => btn.classList.remove('ball-pressed'), 180);
         });
     });
+
+    // Undo Last Ball Button
+    const undoBallBtn = document.getElementById('btn-undo-ball');
+    if (undoBallBtn) {
+        undoBallBtn.addEventListener('click', () => {
+            if (!window.scoreState.isHost) {
+                window.ScoreshModals.showToast('Unauthorized: Only Hosts can undo deliveries', 'error');
+                return;
+            }
+            const match = window.scoreState.activeMatch;
+            if (match) {
+                window.scoreEngine.undoLastBall(match);
+            }
+        });
+    }
 
     // Start 2nd Innings button on banner
     const start2ndInnBtn = document.getElementById('btn-start-second-innings');

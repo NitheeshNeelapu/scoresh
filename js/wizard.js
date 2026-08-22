@@ -3,7 +3,7 @@
  * Guides the Host through the complete onboarding experience:
  * Step 1: Details (Name, Logo, Description, Format, Location, Dates, Rules)
  * Step 2: Teams (Names, Short codes, Colors)
- * Step 3: Squads (Players, Roles, Jersey #, Batting/Bowling styles)
+ * Step 3: Squads (11–20 Players per team, Roles, Wicketkeepers, Batting/Bowling styles)
  * Step 4: Schedule (Auto round-robin fixture pairings)
  */
 
@@ -88,8 +88,10 @@ class TournamentWizard {
                     return;
                 }
             } else if (this.currentStep === 3) {
-                if (this.data.players.length === 0) {
-                    window.ScoreshModals.showToast('Please add player squads to your teams', 'warning');
+                // Check if every team has at least 11 players
+                const invalidTeams = this.data.teams.filter(t => t.playerIds.length < 11);
+                if (invalidTeams.length > 0) {
+                    window.ScoreshModals.showToast(`Minimum 11 players required per team squad. (${invalidTeams.map(t => `${t.name}: ${t.playerIds.length}/11`).join(', ')})`, 'warning');
                     return;
                 }
             }
@@ -163,7 +165,7 @@ class TournamentWizard {
                 <div style="display:flex; align-items:center; gap:0.65rem;">
                     <span style="width:14px; height:14px; border-radius:50%; background-color:${t.color}; display:inline-block;"></span>
                     <strong>${t.name}</strong>
-                    <span class="text-xs text-muted">(${t.shortName})</span>
+                    <span class="text-xs text-muted">(${t.shortName} • ${t.playerIds.length} players)</span>
                 </div>
                 <button type="button" class="btn btn-danger btn-sm" onclick="window.tournamentWizard.removeTeam(${index})">Remove</button>
             </div>
@@ -208,29 +210,42 @@ class TournamentWizard {
     renderStep3Squads() {
         const teamSelect = document.getElementById('wiz-player-team-select');
         if (teamSelect) {
-            teamSelect.innerHTML = this.data.teams.map(t => `<option value="${t.id}">${t.name}</option>`).join('');
+            teamSelect.innerHTML = this.data.teams.map(t => `<option value="${t.id}">${t.name} (${t.playerIds.length}/20 players)</option>`).join('');
+            teamSelect.onchange = () => this.renderPlayersList();
         }
         this.renderPlayersList();
     }
 
     renderPlayersList() {
+        const teamSelect = document.getElementById('wiz-player-team-select');
         const list = document.getElementById('wiz-players-list');
         if (!list) return;
 
-        if (this.data.players.length === 0) {
-            list.innerHTML = `<p class="text-sm text-muted text-center" style="padding:1rem;">No players added yet. Add players to each team squad.</p>`;
+        const currentTeamId = teamSelect ? teamSelect.value : (this.data.teams[0]?.id || null);
+        const currentTeam = this.data.teams.find(t => t.id === currentTeamId);
+
+        // Strict Team Isolation: Show only players of currentTeamId
+        const teamPlayers = this.data.players.filter(p => p.teamId === currentTeamId);
+
+        const squadCounter = document.getElementById('wiz-squad-counter');
+        if (squadCounter) {
+            squadCounter.textContent = `${teamPlayers.length}/20 Players (Min: 11, Max: 20)`;
+            squadCounter.className = teamPlayers.length >= 11 ? 'badge-strike' : 'badge-nonstrike';
+        }
+
+        if (teamPlayers.length === 0) {
+            list.innerHTML = `<p class="text-sm text-muted text-center" style="padding:1rem;">No players added to ${currentTeam ? currentTeam.name : 'this team'} yet. (Need min 11, max 20)</p>`;
             return;
         }
 
-        list.innerHTML = this.data.players.map((p, index) => {
-            const team = this.data.teams.find(t => t.id === p.teamId);
+        list.innerHTML = teamPlayers.map((p) => {
             return `
                 <div class="wizard-item-row">
                     <div>
                         <strong>${p.name}</strong>
-                        <span class="text-xs text-muted" style="margin-left:0.4rem;">(${team ? team.shortName : 'Free Agent'} • ${p.role} • #${p.jersey || '—'})</span>
+                        <span class="text-xs text-muted" style="margin-left:0.4rem;">(${currentTeam ? currentTeam.shortName : 'Team'} • ${p.role}${p.isWicketkeeper ? ' • WK' : ''} • #${p.jersey || '—'})</span>
                     </div>
-                    <button type="button" class="btn btn-danger btn-sm" onclick="window.tournamentWizard.removePlayer(${index})">&times;</button>
+                    <button type="button" class="btn btn-danger btn-sm" onclick="window.tournamentWizard.removePlayerById('${p.id}')">&times;</button>
                 </div>
             `;
         }).join('');
@@ -241,6 +256,7 @@ class TournamentWizard {
         const teamSelect = document.getElementById('wiz-player-team-select');
         const roleSelect = document.getElementById('wiz-player-role');
         const jerseyInput = document.getElementById('wiz-player-jersey');
+        const isWkCheck = document.getElementById('wiz-player-is-wk');
         const batSelect = document.getElementById('wiz-player-bat-style');
         const bowlSelect = document.getElementById('wiz-player-bowl-style');
 
@@ -248,6 +264,7 @@ class TournamentWizard {
         const teamId = teamSelect?.value;
         const role = roleSelect?.value || 'Batsman';
         const jersey = jerseyInput?.value || '';
+        const isWk = Boolean(isWkCheck?.checked || role === 'Wicketkeeper');
         const batStyle = batSelect?.value || 'Right-hand bat';
         const bowlStyle = bowlSelect?.value || 'Right-arm medium';
 
@@ -260,37 +277,50 @@ class TournamentWizard {
             return;
         }
 
+        const team = this.data.teams.find(t => t.id === teamId);
+        if (!team) return;
+
+        // Strict 20 player maximum limit check
+        if (team.playerIds.length >= 20) {
+            window.ScoreshModals.showToast(`Maximum squad size is 20 players. ${team.name} already has 20 players.`, 'error');
+            return;
+        }
+
         const player = new Player({
             id: 'plr_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4),
             teamId,
             name,
             role,
             jersey,
+            isWicketkeeper: isWk,
             battingStyle: batStyle,
             bowlingStyle: bowlStyle
         });
 
         this.data.players.push(player);
-
-        const team = this.data.teams.find(t => t.id === teamId);
-        if (team && !team.playerIds.includes(player.id)) {
-            team.playerIds.push(player.id);
+        team.playerIds.push(player.id);
+        if (isWk && !team.wicketkeeperIds.includes(player.id)) {
+            team.wicketkeeperIds.push(player.id);
         }
 
         if (nameInput) nameInput.value = '';
         if (jerseyInput) jerseyInput.value = '';
-        this.renderPlayersList();
+        if (isWkCheck) isWkCheck.checked = false;
+
+        this.renderStep3Squads();
     }
 
-    removePlayer(index) {
-        const removed = this.data.players.splice(index, 1)[0];
-        if (removed && removed.teamId) {
-            const team = this.data.teams.find(t => t.id === removed.teamId);
+    removePlayerById(playerId) {
+        const pIndex = this.data.players.findIndex(p => p.id === playerId);
+        if (pIndex !== -1) {
+            const player = this.data.players.splice(pIndex, 1)[0];
+            const team = this.data.teams.find(t => t.id === player.teamId);
             if (team) {
-                team.playerIds = team.playerIds.filter(id => id !== removed.id);
+                team.playerIds = team.playerIds.filter(id => id !== playerId);
+                team.wicketkeeperIds = team.wicketkeeperIds.filter(id => id !== playerId);
             }
         }
-        this.renderPlayersList();
+        this.renderStep3Squads();
     }
 
     generateSchedulePreview() {
@@ -309,7 +339,7 @@ class TournamentWizard {
 
                 const match = new Match({
                     id: 'match_' + Date.now() + '_' + matchIndex,
-                    title: `Match #${matchIndex}: ${teamA.name} vs ${teamB.name}`,
+                    title: `${teamA.name} vs ${teamB.name}`,
                     teamAId: teamA.id,
                     teamBId: teamB.id,
                     teamAName: teamA.name,
@@ -348,6 +378,14 @@ class TournamentWizard {
 
     finalizeTournament() {
         this.saveStep1Data();
+
+        // Final check: minimum 11 players per team
+        const invalidTeams = this.data.teams.filter(t => t.playerIds.length < 11);
+        if (invalidTeams.length > 0) {
+            window.ScoreshModals.showToast(`Minimum 11 players required per team squad. (${invalidTeams.map(t => `${t.name}: ${t.playerIds.length}/11`).join(', ')})`, 'error');
+            return;
+        }
+
         const tournament = window.scoreState.createTournament({
             name: this.data.name,
             logo: this.data.logo,

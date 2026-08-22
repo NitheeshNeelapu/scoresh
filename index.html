@@ -1,16 +1,20 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Scoresh — Dynamic Cricket Tournament Platform</title>
-    <meta name="description" content="Dynamic cricket scoring, tournament management, live ball-by-ball updates, points table, player statistics, and analytics platform.">
-    
+    <meta name="description"
+        content="Dynamic cricket scoring, tournament management, live ball-by-ball updates, points table, player statistics, and analytics platform.">
+
     <!-- Google Fonts: Inter & JetBrains Mono -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600;700;800&display=swap" rel="stylesheet">
-    
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600;700;800&display=swap"
+        rel="stylesheet">
+
     <!-- Chart.js CDN for Visual Analytics -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 
@@ -19,9 +23,10 @@
     <link rel="stylesheet" href="css/components.css">
     <link rel="stylesheet" href="css/responsive.css">
 </head>
+
 <body>
     <div class="app-container">
-        
+
         <!-- ==========================================
              NAVIGATION BAR
              ========================================== -->
@@ -30,10 +35,11 @@
                 <!-- Brand Logo & Name -->
                 <div class="nav-brand" data-view="welcome">
                     <div class="brand-logo-icon">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
-                            <circle cx="12" cy="12" r="10"/>
-                            <path d="M12 2a14.5 14.5 0 0 0 0 20"/>
-                            <path d="M2 12h20"/>
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2.2">
+                            <circle cx="12" cy="12" r="10" />
+                            <path d="M12 2a14.5 14.5 0 0 0 0 20" />
+                            <path d="M2 12h20" />
                         </svg>
                     </div>
                     <span class="brand-text">Scoresh</span>
@@ -49,16 +55,25 @@
 
                 <!-- Desktop Navigation Links -->
                 <ul class="nav-links">
-                    <li class="requires-tournament"><a href="#dashboard" class="nav-link" data-view="dashboard">Dashboard</a></li>
+                    <li class="requires-tournament"><a href="#dashboard" class="nav-link"
+                            data-view="dashboard">Dashboard</a></li>
                     <li><a href="#tournaments" class="nav-link" data-view="tournaments">Tournaments</a></li>
-                    <li class="requires-tournament"><a href="#matches" class="nav-link" data-view="matches">Matches</a></li>
-                    <li class="requires-tournament"><a href="#teams" class="nav-link" data-view="teams">Teams & Squads</a></li>
-                    <li class="requires-tournament"><a href="#players" class="nav-link" data-view="players">Players</a></li>
-                    <li class="requires-tournament"><a href="#live" class="nav-link" data-view="live">Live Scoring</a></li>
-                    <li class="requires-tournament"><a href="#scorecard" class="nav-link" data-view="scorecard">Scorecard</a></li>
-                    <li class="requires-tournament"><a href="#table" class="nav-link" data-view="table">Points Table</a></li>
-                    <li class="requires-tournament"><a href="#records" class="nav-link" data-view="records">Records</a></li>
-                    <li class="requires-tournament"><a href="#analytics" class="nav-link" data-view="analytics">Analytics</a></li>
+                    <li class="requires-tournament"><a href="#matches" class="nav-link" data-view="matches">Matches</a>
+                    </li>
+                    <li class="requires-tournament"><a href="#teams" class="nav-link" data-view="teams">Teams &
+                            Squads</a></li>
+                    <li class="requires-tournament"><a href="#players" class="nav-link" data-view="players">Players</a>
+                    </li>
+                    <li class="requires-tournament"><a href="#live" class="nav-link" data-view="live">Live Scoring</a>
+                    </li>
+                    <li class="requires-tournament"><a href="#scorecard" class="nav-link"
+                            data-view="scorecard">Scorecard</a></li>
+                    <li class="requires-tournament"><a href="#table" class="nav-link" data-view="table">Points Table</a>
+                    </li>
+                    <li class="requires-tournament"><a href="#records" class="nav-link" data-view="records">Records</a>
+                    </li>
+                    <li class="requires-tournament"><a href="#analytics" class="nav-link"
+                            data-view="analytics">Analytics</a></li>
                 </ul>
 
                 <!-- Right Actions: User Role Auth Pill, Search, Action Button -->
@@ -66,18 +81,31 @@
                     <div id="top-user-auth-pill"></div>
 
                     <div class="nav-search-box">
-                        <svg class="nav-search-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                        <svg class="nav-search-icon" width="14" height="14" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2.5">
+                            <circle cx="11" cy="11" r="8" />
+                            <line x1="21" y1="21" x2="16.65" y2="16.65" />
+                        </svg>
                         <input type="text" class="search-input" placeholder="Search...">
                     </div>
 
                     <button class="btn btn-accent btn-sm host-only-control" data-action="open-wizard">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2.5">
+                            <line x1="12" y1="5" x2="12" y2="19" />
+                            <line x1="5" y1="12" x2="19" y2="12" />
+                        </svg>
                         <span>+ Tournament</span>
                     </button>
 
                     <!-- Mobile Hamburger Button -->
                     <button class="hamburger-btn" id="hamburger-btn" aria-label="Toggle navigation">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <line x1="3" y1="12" x2="21" y2="12" />
+                            <line x1="3" y1="6" x2="21" y2="6" />
+                            <line x1="3" y1="18" x2="21" y2="18" />
+                        </svg>
                     </button>
                 </div>
             </div>
@@ -88,25 +116,39 @@
             <div class="mobile-drawer-content">
                 <div class="mobile-drawer-header">
                     <div class="nav-brand">
-                        <div class="brand-logo-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/></svg></div>
+                        <div class="brand-logo-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"
+                                stroke="currentColor" stroke-width="2">
+                                <circle cx="12" cy="12" r="10" />
+                                <path d="M2 12h20" />
+                            </svg></div>
                         <span class="brand-text">Scoresh</span>
                     </div>
                     <button class="btn-close-modal" id="close-drawer-btn">&times;</button>
                 </div>
                 <ul class="mobile-nav-links">
                     <li><a href="#welcome" class="mobile-nav-link" data-view="welcome">Home / Choice</a></li>
-                    <li class="requires-tournament"><a href="#dashboard" class="mobile-nav-link" data-view="dashboard">Tournament Dashboard</a></li>
+                    <li class="requires-tournament"><a href="#dashboard" class="mobile-nav-link"
+                            data-view="dashboard">Tournament Dashboard</a></li>
                     <li><a href="#tournaments" class="mobile-nav-link" data-view="tournaments">All Tournaments</a></li>
-                    <li class="requires-tournament"><a href="#matches" class="mobile-nav-link" data-view="matches">Fixtures & Matches</a></li>
-                    <li class="requires-tournament"><a href="#teams" class="mobile-nav-link" data-view="teams">Teams & Squads</a></li>
-                    <li class="requires-tournament"><a href="#players" class="mobile-nav-link" data-view="players">Players Directory</a></li>
-                    <li class="requires-tournament"><a href="#live" class="mobile-nav-link" data-view="live">Live Scoring</a></li>
-                    <li class="requires-tournament"><a href="#scorecard" class="mobile-nav-link" data-view="scorecard">Scorecard</a></li>
-                    <li class="requires-tournament"><a href="#table" class="mobile-nav-link" data-view="table">Points Table</a></li>
-                    <li class="requires-tournament"><a href="#records" class="mobile-nav-link" data-view="records">Tournament Records</a></li>
-                    <li class="requires-tournament"><a href="#analytics" class="mobile-nav-link" data-view="analytics">Charts & Analytics</a></li>
+                    <li class="requires-tournament"><a href="#matches" class="mobile-nav-link"
+                            data-view="matches">Fixtures & Matches</a></li>
+                    <li class="requires-tournament"><a href="#teams" class="mobile-nav-link" data-view="teams">Teams &
+                            Squads</a></li>
+                    <li class="requires-tournament"><a href="#players" class="mobile-nav-link"
+                            data-view="players">Players Directory</a></li>
+                    <li class="requires-tournament"><a href="#live" class="mobile-nav-link" data-view="live">Live
+                            Scoring</a></li>
+                    <li class="requires-tournament"><a href="#scorecard" class="mobile-nav-link"
+                            data-view="scorecard">Scorecard</a></li>
+                    <li class="requires-tournament"><a href="#table" class="mobile-nav-link" data-view="table">Points
+                            Table</a></li>
+                    <li class="requires-tournament"><a href="#records" class="mobile-nav-link"
+                            data-view="records">Tournament Records</a></li>
+                    <li class="requires-tournament"><a href="#analytics" class="mobile-nav-link"
+                            data-view="analytics">Charts & Analytics</a></li>
                 </ul>
-                <div style="margin-top:auto; display:flex; flex-direction:column; gap:0.5rem;" class="host-only-control">
+                <div style="margin-top:auto; display:flex; flex-direction:column; gap:0.5rem;"
+                    class="host-only-control">
                     <button class="btn btn-accent" data-action="open-wizard">+ New Tournament</button>
                 </div>
             </div>
@@ -117,7 +159,7 @@
              MAIN CONTENT AREA & SPA VIEWS
              ========================================== -->
         <main class="main-content">
-            
+
             <!-- ----------------------------------------
                  1. VIEW: WELCOME & ONBOARDING CHOICE
                  ---------------------------------------- -->
@@ -126,8 +168,9 @@
                     <div class="welcome-hero-card">
                         <h1 class="welcome-title">Welcome to Scoresh</h1>
                         <p class="welcome-subtitle">“Your tournament. Your score. Your game.”</p>
-                        
-                        <h2 style="font-size:1.3rem; font-weight:700; color:var(--color-primary); margin-top:1.5rem;" id="welcome-host-prompt">
+
+                        <h2 style="font-size:1.3rem; font-weight:700; color:var(--color-primary); margin-top:1.5rem;"
+                            id="welcome-host-prompt">
                             Do you have a new tournament to create?
                         </h2>
 
@@ -136,31 +179,48 @@
                             <div class="choice-action-card host-only-control" onclick="window.tournamentWizard.open()">
                                 <div>
                                     <div class="choice-icon-box">
-                                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+                                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
+                                            stroke="currentColor" stroke-width="2">
+                                            <path d="M12 2v20" />
+                                            <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
+                                        </svg>
                                     </div>
-                                    <h3 class="choice-card-title">Create New Tournament</h3>
-                                    <p class="choice-card-desc">Set up tournament format (T10, T20, ODI, Test, Custom), register teams, add player squads, and generate fixtures.</p>
+                                    <h3 class="choice-card-title">Create a Tournament</h3>
+                                    <p class="choice-card-desc">Set up tournament format (T10, T20, ODI, Test, Custom),
+                                        register teams, add player squads, and generate fixtures.</p>
                                 </div>
-                                <button class="btn btn-accent btn-sm" style="width:100%;">Launch Setup Wizard &rarr;</button>
+                                <button class="btn btn-accent btn-sm" style="width:100%;">Launch Setup Wizard
+                                    &rarr;</button>
                             </div>
 
                             <!-- Choice 2: Tournaments Directory -->
                             <div class="choice-action-card" onclick="window.scoreState.setView('tournaments')">
                                 <div>
-                                    <div class="choice-icon-box" style="background-color: var(--color-blue-light); color: var(--color-blue);">
-                                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.45 1-1 1H7v2h10v-2h-2c-.55 0-1-.45-1-1v-2.34c3.55-.83 6-3.99 6-7.66V4H4v3c0 3.67 2.45 6.83 6 7.66z"/></svg>
+                                    <div class="choice-icon-box"
+                                        style="background-color: var(--color-blue-light); color: var(--color-blue);">
+                                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
+                                            stroke="currentColor" stroke-width="2">
+                                            <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6" />
+                                            <path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18" />
+                                            <path d="M4 22h16" />
+                                            <path
+                                                d="M10 14.66V17c0 .55-.45 1-1 1H7v2h10v-2h-2c-.55 0-1-.45-1-1v-2.34c3.55-.83 6-3.99 6-7.66V4H4v3c0 3.67 2.45 6.83 6 7.66z" />
+                                        </svg>
                                     </div>
-                                    <h3 class="choice-card-title">Manage Existing Tournament</h3>
-                                    <p class="choice-card-desc">Browse, manage, or switch between your school, college, corporate, or club leagues.</p>
+                                    <h3 class="choice-card-title">Join or View Tournament</h3>
+                                    <p class="choice-card-desc">Browse and follow live matches, scorecards, points
+                                        tables, and player statistics across your leagues.</p>
                                 </div>
-                                <button class="btn btn-secondary btn-sm" style="width:100%;">View Tournaments &rarr;</button>
+                                <button class="btn btn-secondary btn-sm" style="width:100%;">View Tournaments
+                                    &rarr;</button>
                             </div>
                         </div>
                     </div>
 
                     <!-- Existing Tournaments Quick List -->
-                    <div id="welcome-existing-card" style="background-color:var(--bg-card); border:1px solid var(--border-color); border-radius:var(--radius-md); padding:1.5rem; text-align:left; display:none;">
-                        <h3 style="font-size:1.05rem; font-weight:700; margin-bottom:0.75rem;">Your Created Tournaments</h3>
+                    <div id="welcome-existing-card"
+                        style="background-color:var(--bg-card); border:1px solid var(--border-color); border-radius:var(--radius-md); padding:1.5rem; text-align:left; display:none;">
+                        <h3 style="font-size:1.05rem; font-weight:700; margin-bottom:0.75rem;">Your Tournaments</h3>
                         <div id="welcome-tournaments-list"></div>
                     </div>
                 </div>
@@ -174,11 +234,13 @@
                 <div class="page-header">
                     <div class="page-title-group">
                         <h1 id="dash-tourn-name">Tournament Dashboard</h1>
-                        <p class="page-tagline" id="dash-tourn-format">T20 Format • Local League</p>
+                        <p class="page-tagline" id="dash-tourn-format">Format & Venue Details</p>
                     </div>
                     <div class="page-actions-bar host-only-control">
-                        <button class="btn btn-secondary btn-sm" onclick="window.ScoreshModals.openCreateMatchModal()">+ Create Match</button>
-                        <button class="btn btn-accent btn-sm" onclick="window.tournamentWizard.open()">+ New Tournament</button>
+                        <button class="btn btn-secondary btn-sm" onclick="window.ScoreshModals.openCreateMatchModal()">+
+                            Create Match</button>
+                        <button class="btn btn-accent btn-sm" onclick="window.tournamentWizard.open()">+ New
+                            Tournament</button>
                     </div>
                 </div>
 
@@ -188,9 +250,10 @@
                         <div class="match-title-badge" id="dash-live-match-title">Match Title</div>
                         <div class="live-indicator"><span class="live-dot"></span> <span>LIVE MATCH</span></div>
                     </div>
-                    <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem;">
+                    <div
+                        style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem;">
                         <div>
-                            <h2 style="font-size:1.4rem; font-weight:800;" id="dash-live-match-score">Team A vs Team B</h2>
+                            <h2 style="font-size:1.4rem; font-weight:800;" id="dash-live-match-score">Score Details</h2>
                             <p class="text-sm text-muted" id="dash-live-match-status">Innings in progress</p>
                         </div>
                         <button class="btn btn-accent" id="dash-live-match-btn">Go to Live Match &rarr;</button>
@@ -222,28 +285,39 @@
                 </div>
 
                 <!-- Matches & Leaderboard Summary Grid -->
-                <div id="dash-matches-summary-grid" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap:1.25rem;">
+                <div id="dash-matches-summary-grid"
+                    style="display:grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap:1.25rem;">
                     <!-- Next Upcoming Fixture -->
                     <div class="table-wrapper" style="padding:1.25rem;">
-                        <h3 style="font-size:0.95rem; font-weight:700; text-transform:uppercase; color:var(--color-muted); margin-bottom:0.75rem;">Upcoming Match</h3>
-                        <p style="font-size:1.05rem; font-weight:700; color:var(--color-primary);" id="dash-upcoming-match">No upcoming match scheduled</p>
+                        <h3
+                            style="font-size:0.95rem; font-weight:700; text-transform:uppercase; color:var(--color-muted); margin-bottom:0.75rem;">
+                            Upcoming Match</h3>
+                        <p style="font-size:1.05rem; font-weight:700; color:var(--color-primary);"
+                            id="dash-upcoming-match">No upcoming match scheduled</p>
                     </div>
 
                     <!-- Latest Result -->
                     <div class="table-wrapper" style="padding:1.25rem;">
-                        <h3 style="font-size:0.95rem; font-weight:700; text-transform:uppercase; color:var(--color-muted); margin-bottom:0.75rem;">Latest Result</h3>
-                        <p style="font-size:1.05rem; font-weight:700; color:var(--color-green);" id="dash-latest-result">Tournament awaiting first result</p>
+                        <h3
+                            style="font-size:0.95rem; font-weight:700; text-transform:uppercase; color:var(--color-muted); margin-bottom:0.75rem;">
+                            Latest Result</h3>
+                        <p style="font-size:1.05rem; font-weight:700; color:var(--color-green);"
+                            id="dash-latest-result">Tournament awaiting first result</p>
                     </div>
 
                     <!-- Top Run Scorer -->
                     <div class="table-wrapper" style="padding:1.25rem;">
-                        <h3 style="font-size:0.95rem; font-weight:700; text-transform:uppercase; color:var(--color-muted); margin-bottom:0.75rem;">Top Run Scorer</h3>
+                        <h3
+                            style="font-size:0.95rem; font-weight:700; text-transform:uppercase; color:var(--color-muted); margin-bottom:0.75rem;">
+                            Top Run Scorer</h3>
                         <p style="font-size:1.1rem; font-weight:700;" id="dash-top-scorer">—</p>
                     </div>
 
                     <!-- Top Wicket Taker -->
                     <div class="table-wrapper" style="padding:1.25rem;">
-                        <h3 style="font-size:0.95rem; font-weight:700; text-transform:uppercase; color:var(--color-muted); margin-bottom:0.75rem;">Top Wicket Taker</h3>
+                        <h3
+                            style="font-size:0.95rem; font-weight:700; text-transform:uppercase; color:var(--color-muted); margin-bottom:0.75rem;">
+                            Top Wicket Taker</h3>
                         <p style="font-size:1.1rem; font-weight:700;" id="dash-top-bowler">—</p>
                     </div>
                 </div>
@@ -275,10 +349,12 @@
                 <div class="page-header">
                     <div class="page-title-group">
                         <h1>Fixtures & Results</h1>
-                        <p class="page-tagline">Manage upcoming fixtures, live matches in progress, and completed scorecards.</p>
+                        <p class="page-tagline">Manage upcoming fixtures, live matches in progress, and completed
+                            scorecards.</p>
                     </div>
                     <div class="page-actions-bar host-only-control">
-                        <button class="btn btn-accent" onclick="window.ScoreshModals.openCreateMatchModal()">+ Create Match</button>
+                        <button class="btn btn-accent" onclick="window.ScoreshModals.openCreateMatchModal()">+ Create
+                            Match</button>
                     </div>
                 </div>
 
@@ -293,10 +369,12 @@
                 <div class="page-header">
                     <div class="page-title-group">
                         <h1>Teams & Squads</h1>
-                        <p class="page-tagline">Registered tournament teams and their player rosters.</p>
+                        <p class="page-tagline">Registered tournament teams, captains, wicketkeepers, and player
+                            rosters.</p>
                     </div>
                     <div class="page-actions-bar host-only-control">
-                        <button class="btn btn-accent" onclick="window.ScoreshModals.openAddTeamModal()">+ Add Team</button>
+                        <button class="btn btn-accent" onclick="window.ScoreshModals.openAddTeamModal()">+ Add
+                            Team</button>
                     </div>
                 </div>
 
@@ -311,10 +389,11 @@
                 <div class="page-header">
                     <div class="page-title-group">
                         <h1>Players Directory</h1>
-                        <p class="page-tagline">Complete player roster across all teams.</p>
+                        <p class="page-tagline">Complete tournament player roster.</p>
                     </div>
                     <div class="page-actions-bar host-only-control">
-                        <button class="btn btn-accent" onclick="window.ScoreshModals.openAddPlayerModal()">+ Add Player</button>
+                        <button class="btn btn-accent" onclick="window.ScoreshModals.openAddPlayerModal()">+ Add
+                            Player</button>
                     </div>
                 </div>
 
@@ -346,8 +425,10 @@
                 <div id="live-no-match-empty" class="empty-state-card" style="display:none;">
                     <div class="empty-icon">🏏</div>
                     <h3 class="empty-title">No live match selected</h3>
-                    <p class="empty-desc">Select a match from the Fixtures tab or create a new match to begin scoring.</p>
-                    <button class="btn btn-primary" onclick="window.scoreState.setView('matches')">Go to Matches</button>
+                    <p class="empty-desc">Select a match from the Fixtures tab or create a new match to begin scoring.
+                    </p>
+                    <button class="btn btn-primary" onclick="window.scoreState.setView('matches')">Go to
+                        Matches</button>
                 </div>
 
                 <div id="live-active-match-content">
@@ -357,24 +438,31 @@
                             <p class="page-tagline" id="live-match-header-venue">Cricket Stadium</p>
                         </div>
                         <div class="page-actions-bar">
-                            <button class="btn btn-secondary btn-sm" onclick="window.scoreState.setView('scorecard')">Full Scorecard</button>
+                            <button class="btn btn-secondary btn-sm"
+                                onclick="window.scoreState.setView('scorecard')">Full Scorecard</button>
                         </div>
                     </div>
 
                     <!-- Innings Break Banner -->
-                    <div id="live-innings-break-banner" style="display:none; background-color:var(--color-green-light); border:1px solid #86efac; border-radius:var(--radius-md); padding:1rem 1.25rem; margin-bottom:1.5rem; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem;">
+                    <div id="live-innings-break-banner"
+                        style="display:none; background-color:var(--color-green-light); border:1px solid #86efac; border-radius:var(--radius-md); padding:1rem 1.25rem; margin-bottom:1.5rem; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem;">
                         <div>
                             <strong style="color:var(--color-green-text); font-size:1.1rem;">Innings Break!</strong>
-                            <span class="text-xs text-muted" id="live-innings-target-text" style="margin-left:0.5rem;">Target: 0 runs</span>
+                            <span class="text-xs text-muted" id="live-innings-target-text"
+                                style="margin-left:0.5rem;">Target: 0 runs</span>
                         </div>
-                        <button class="btn btn-accent btn-sm host-only-control" id="btn-start-second-innings">Start 2nd Innings (Chase) &rarr;</button>
+                        <button class="btn btn-accent btn-sm host-only-control" id="btn-start-second-innings">Start 2nd
+                            Innings (Chase) &rarr;</button>
                     </div>
 
                     <!-- Match Result Completed Banner -->
-                    <div id="live-match-result-banner" style="display:none; background-color:var(--bg-card); border:2px solid var(--color-green); border-radius:var(--radius-md); padding:1.25rem; margin-bottom:1.5rem; text-align:center;">
+                    <div id="live-match-result-banner"
+                        style="display:none; background-color:var(--bg-card); border:2px solid var(--color-green); border-radius:var(--radius-md); padding:1.25rem; margin-bottom:1.5rem; text-align:center;">
                         <span class="badge-strike">Match Completed</span>
-                        <h2 style="font-size:1.5rem; font-weight:800; color:var(--color-green); margin:0.4rem 0;" id="live-match-result-text">Winner Summary</h2>
-                        <button class="btn btn-secondary btn-sm" onclick="window.scoreState.setView('scorecard')">View Match Scorecard &rarr;</button>
+                        <h2 style="font-size:1.5rem; font-weight:800; color:var(--color-green); margin:0.4rem 0;"
+                            id="live-match-result-text">Winner Summary</h2>
+                        <button class="btn btn-secondary btn-sm" onclick="window.scoreState.setView('scorecard')">View
+                            Match Scorecard &rarr;</button>
                     </div>
 
                     <!-- Main Live Score Card -->
@@ -396,7 +484,8 @@
 
                             <div class="team-score-block">
                                 <div class="team-name-label" id="live-bowl-team-name">Bowling Team</div>
-                                <div style="font-size:1.1rem; font-weight:600; color:var(--color-muted); margin-top:0.25rem;" id="live-bowl-team-score">Yet to Bat</div>
+                                <div style="font-size:1.1rem; font-weight:600; color:var(--color-muted); margin-top:0.25rem;"
+                                    id="live-bowl-team-score">Yet to Bat</div>
                             </div>
                         </div>
 
@@ -416,18 +505,21 @@
                         </div>
                     </div>
 
-                    <!-- On-Crease Active Batsmen & Bowler Cards -->
+                    <!-- On-Crease Active Batsmen & Bowler Cards (Real Player Data) -->
                     <div class="crease-panel-grid">
                         <!-- Striker -->
                         <div class="player-mini-card active-crease">
                             <div class="mini-card-header">
                                 <span class="mini-card-role text-green">★ Striker</span>
-                                <span class="mini-card-substat font-mono font-bold text-green" id="live-striker-sr">SR 0.00</span>
+                                <span class="mini-card-substat font-mono font-bold text-green" id="live-striker-sr">SR
+                                    0.00</span>
                             </div>
-                            <div class="mini-card-name" id="live-striker-name">Striker</div>
+                            <div class="mini-card-name" id="live-striker-name">—</div>
                             <div class="mini-card-stats">
                                 <span class="mini-card-primary-stat" id="live-striker-runs">0</span>
-                                <span class="mini-card-substat">(<span id="live-striker-balls">0</span>b, <span id="live-striker-fours">0</span>x4, <span id="live-striker-sixes">0</span>x6)</span>
+                                <span class="mini-card-substat">(<span id="live-striker-balls">0</span>b, <span
+                                        id="live-striker-fours">0</span>x4, <span
+                                        id="live-striker-sixes">0</span>x6)</span>
                             </div>
                         </div>
 
@@ -437,7 +529,7 @@
                                 <span class="mini-card-role text-muted">• Non-Striker</span>
                                 <span class="mini-card-substat font-mono" id="live-nonstriker-sr">SR 0.00</span>
                             </div>
-                            <div class="mini-card-name" id="live-nonstriker-name">Non-Striker</div>
+                            <div class="mini-card-name" id="live-nonstriker-name">—</div>
                             <div class="mini-card-stats">
                                 <span class="mini-card-primary-stat" id="live-nonstriker-runs">0</span>
                                 <span class="mini-card-substat">(<span id="live-nonstriker-balls">0</span> balls)</span>
@@ -450,21 +542,62 @@
                                 <span class="mini-card-role text-blue">Current Bowler</span>
                                 <span class="mini-card-substat font-mono" id="live-bowler-econ">Econ 0.00</span>
                             </div>
-                            <div class="mini-card-name" id="live-bowler-name">Bowler</div>
+                            <div class="mini-card-name" id="live-bowler-name">—</div>
                             <div class="mini-card-stats">
-                                <span class="mini-card-primary-stat text-green"><span id="live-bowler-wkts">0</span> / <span id="live-bowler-runs">0</span></span>
-                                <span class="mini-card-substat">(<span id="live-bowler-overs">0.0</span> ov, <span id="live-bowler-maidens">0</span> mdn)</span>
+                                <span class="mini-card-primary-stat text-green"><span id="live-bowler-wkts">0</span> /
+                                    <span id="live-bowler-runs">0</span></span>
+                                <span class="mini-card-substat">(<span id="live-bowler-overs">0.0</span> ov, <span
+                                        id="live-bowler-maidens">0</span> mdn)</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Estimated Winning Probability Widget -->
+                    <div class="winning-prob-card" id="live-win-prob-card">
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.6rem; flex-wrap:wrap; gap:0.5rem;">
+                            <span class="text-xs font-bold uppercase text-muted" style="letter-spacing:0.05em;">Estimated Winning Probability</span>
+                            <span class="text-xs text-muted" id="live-prob-equation">Match In Progress</span>
+                        </div>
+                        <div class="win-prob-bar-wrapper">
+                            <div class="win-prob-bar-segment team-a-segment" id="live-prob-bar-a" style="width: 50%;">
+                                <span class="prob-bar-label" id="live-prob-label-a">Team A 50%</span>
+                            </div>
+                            <div class="win-prob-bar-segment team-b-segment" id="live-prob-bar-b" style="width: 50%;">
+                                <span class="prob-bar-label" id="live-prob-label-b">Team B 50%</span>
+                            </div>
+                        </div>
+                        <div class="win-prob-stats-grid" id="live-prob-stats-strip">
+                            <div class="prob-substat-item">
+                                <span class="text-xs text-muted">Required:</span>
+                                <strong id="live-prob-runs-req">—</strong>
+                            </div>
+                            <div class="prob-substat-item">
+                                <span class="text-xs text-muted">Balls Left:</span>
+                                <strong id="live-prob-balls-left">—</strong>
+                            </div>
+                            <div class="prob-substat-item">
+                                <span class="text-xs text-muted">Req Run Rate:</span>
+                                <strong id="live-prob-rrr" class="text-amber">—</strong>
+                            </div>
+                            <div class="prob-substat-item">
+                                <span class="text-xs text-muted">Current Rate:</span>
+                                <strong id="live-prob-crr" class="text-green">0.00</strong>
                             </div>
                         </div>
                     </div>
 
                     <!-- Live Scoring Controls Pad (HOST ONLY) -->
                     <div class="live-scoring-controls-card host-only-control">
-                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.75rem;">
+                        <div
+                            style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.75rem; flex-wrap:wrap; gap:0.5rem;">
                             <span class="text-xs font-bold uppercase text-muted">Host Ball Scoring Pad</span>
                             <div style="display:flex; gap:0.4rem;">
-                                <button class="btn btn-secondary btn-sm" id="btn-manual-rotate-strike" title="Rotate on-crease strike">Rotate Strike</button>
-                                <button class="btn btn-secondary btn-sm" onclick="window.ScoreshModals.openChangeBowlerModal()">Change Bowler</button>
+                                <button class="btn btn-secondary btn-sm" id="btn-manual-rotate-strike"
+                                    title="Rotate on-crease strike">Rotate Strike</button>
+                                <button class="btn btn-secondary btn-sm"
+                                    onclick="window.ScoreshModals.openChangeBowlerModal()">Change Bowler</button>
+                                <button class="btn btn-danger btn-sm" id="btn-undo-ball"
+                                    title="Undo the last delivery">↶ Undo Last Ball</button>
                             </div>
                         </div>
 
@@ -484,22 +617,40 @@
 
                         <!-- Optional Commentary Input -->
                         <div style="display:flex; gap:0.5rem; margin-top:0.75rem;">
-                            <input type="text" id="live-custom-commentary" class="form-input" placeholder="Optional live ball commentary (e.g. Driven through extra cover for four)...">
+                            <input type="text" id="live-custom-commentary" class="form-input"
+                                placeholder="Optional live ball commentary notes...">
                         </div>
                     </div>
 
                     <!-- Participant Notice -->
-                    <div class="participant-only-notice" style="background-color:var(--color-blue-light); border:1px solid #93c5fd; padding:0.75rem 1rem; border-radius:var(--radius-sm); margin-bottom:1.5rem; font-size:0.85rem; color:var(--color-blue);">
-                        ℹ️ <strong>Participant View:</strong> You are viewing live ball updates in real time. Live scoring controls are restricted to the Tournament Host.
+                    <div class="participant-only-notice"
+                        style="background-color:var(--color-blue-light); border:1px solid #93c5fd; padding:0.75rem 1rem; border-radius:var(--radius-sm); margin-bottom:1.5rem; font-size:0.85rem; color:var(--color-blue);">
+                        ℹ️ <strong>Participant View:</strong> You are viewing live ball updates in real time. Live
+                        scoring controls are restricted to the Tournament Host.
+                    </div>
+
+                    <!-- Embedded Live Match Full Scorecard Section -->
+                    <div class="live-embedded-scorecard-section" style="margin-bottom:1.5rem;">
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.75rem; flex-wrap:wrap; gap:0.5rem;">
+                            <h3 style="font-size:1.15rem; font-weight:800; display:flex; align-items:center; gap:0.5rem;">
+                                <span>📋 Full Match Scorecard</span>
+                            </h3>
+                            <div style="display:flex; gap:0.5rem;">
+                                <button class="btn btn-secondary btn-sm" onclick="window.scoreState.setView('scorecard')">Open Dedicated Scorecard View &rarr;</button>
+                            </div>
+                        </div>
+                        <div id="live-embedded-scorecard-container"></div>
                     </div>
 
                     <!-- Recent Balls & Commentary Feed -->
                     <div style="display:grid; grid-template-columns: 1fr; gap:1.25rem;">
                         <div class="commentary-feed-box">
-                            <h3 style="font-size:0.95rem; font-weight:700; margin-bottom:0.75rem;">Recent Deliveries</h3>
+                            <h3 style="font-size:0.95rem; font-weight:700; margin-bottom:0.75rem;">Recent Deliveries
+                            </h3>
                             <div class="recent-balls-strip" id="live-recent-balls-list"></div>
-                            
-                            <h3 style="font-size:0.95rem; font-weight:700; margin:1rem 0 0.5rem;">Ball-by-Ball Commentary Feed</h3>
+
+                            <h3 style="font-size:0.95rem; font-weight:700; margin:1rem 0 0.5rem;">Ball-by-Ball
+                                Commentary Feed</h3>
                             <div id="live-commentary-feed"></div>
                         </div>
                     </div>
@@ -514,11 +665,17 @@
                 <div class="page-header">
                     <div class="page-title-group">
                         <h1>Match Scorecard</h1>
-                        <p class="page-tagline">Complete batting, bowling, fall of wickets, partnerships, and extras breakdown derived from delivery events.</p>
+                        <p class="page-tagline">Complete batting, bowling, fall of wickets, partnerships, and extras
+                            breakdown derived from delivery events.</p>
                     </div>
                     <div class="page-actions-bar">
                         <button class="btn btn-primary btn-sm" data-action="print-scorecard">Print Scorecard</button>
                     </div>
+                </div>
+
+                <div class="scorecard-match-selector-bar" style="background-color:var(--bg-card); border:1px solid var(--border-color); border-radius:var(--radius-md); padding:0.75rem 1rem; margin-bottom:1.25rem; display:flex; align-items:center; gap:1rem; flex-wrap:wrap;">
+                    <label for="scorecard-match-select" style="font-size:0.85rem; font-weight:700; color:var(--color-muted);">SELECT MATCH:</label>
+                    <select id="scorecard-match-select" class="form-input" style="max-width:340px; padding:0.4rem 0.75rem;" onchange="window.scoreState.selectMatch(this.value, 'scorecard')"></select>
                 </div>
 
                 <div id="scorecard-full-container"></div>
@@ -612,30 +769,38 @@
                     </div>
                 </div>
 
-                <div style="background-color:var(--bg-card); border:1px solid var(--border-color); border-radius:var(--radius-md); padding:1.5rem; margin-top:1.5rem;">
-                    <h3 style="font-size:1.05rem; font-weight:700; margin-bottom:1rem;">Tournament Totals & Milestones</h3>
+                <div
+                    style="background-color:var(--bg-card); border:1px solid var(--border-color); border-radius:var(--radius-md); padding:1.5rem; margin-top:1.5rem;">
+                    <h3 style="font-size:1.05rem; font-weight:700; margin-bottom:1rem;">Tournament Totals & Milestones
+                    </h3>
                     <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap:1rem;">
-                        <div style="padding:0.75rem; background-color:var(--bg-subtle); border-radius:var(--radius-sm);">
+                        <div
+                            style="padding:0.75rem; background-color:var(--bg-subtle); border-radius:var(--radius-sm);">
                             <div class="text-xs text-muted font-bold uppercase">Total Runs</div>
                             <div class="font-mono text-2xl font-bold" id="rec-total-runs">0</div>
                         </div>
-                        <div style="padding:0.75rem; background-color:var(--bg-subtle); border-radius:var(--radius-sm);">
+                        <div
+                            style="padding:0.75rem; background-color:var(--bg-subtle); border-radius:var(--radius-sm);">
                             <div class="text-xs text-muted font-bold uppercase">Total Wickets</div>
                             <div class="font-mono text-2xl font-bold text-green" id="rec-total-wickets">0</div>
                         </div>
-                        <div style="padding:0.75rem; background-color:var(--bg-subtle); border-radius:var(--radius-sm);">
+                        <div
+                            style="padding:0.75rem; background-color:var(--bg-subtle); border-radius:var(--radius-sm);">
                             <div class="text-xs text-muted font-bold uppercase">Total Fours</div>
                             <div class="font-mono text-2xl font-bold" id="rec-total-fours">0</div>
                         </div>
-                        <div style="padding:0.75rem; background-color:var(--bg-subtle); border-radius:var(--radius-sm);">
+                        <div
+                            style="padding:0.75rem; background-color:var(--bg-subtle); border-radius:var(--radius-sm);">
                             <div class="text-xs text-muted font-bold uppercase">Total Sixes</div>
                             <div class="font-mono text-2xl font-bold" id="rec-total-sixes">0</div>
                         </div>
-                        <div style="padding:0.75rem; background-color:var(--bg-subtle); border-radius:var(--radius-sm);">
+                        <div
+                            style="padding:0.75rem; background-color:var(--bg-subtle); border-radius:var(--radius-sm);">
                             <div class="text-xs text-muted font-bold uppercase">Centuries (100+)</div>
                             <div class="font-mono text-2xl font-bold text-green" id="rec-total-centuries">0</div>
                         </div>
-                        <div style="padding:0.75rem; background-color:var(--bg-subtle); border-radius:var(--radius-sm);">
+                        <div
+                            style="padding:0.75rem; background-color:var(--bg-subtle); border-radius:var(--radius-sm);">
                             <div class="text-xs text-muted font-bold uppercase">50s (Fifties)</div>
                             <div class="font-mono text-2xl font-bold text-green" id="rec-total-fifties">0</div>
                         </div>
@@ -651,7 +816,8 @@
                 <div class="page-header">
                     <div class="page-title-group">
                         <h1>Match & Tournament Analytics</h1>
-                        <p class="page-tagline">Visual graphs of run distributions, scoring impact, and bowling figures.</p>
+                        <p class="page-tagline">Visual graphs of run distributions, scoring impact, and bowling figures.
+                        </p>
                     </div>
                 </div>
 
@@ -697,20 +863,25 @@
 
 
         <!-- ==========================================
-             FOOTER / ABOUT SECTION
+             FOOTER
              ========================================== -->
         <footer class="footer">
             <div class="footer-inner">
                 <div class="footer-top">
                     <div>
                         <div class="footer-brand">
-                            <div class="brand-logo-icon" style="width:24px; height:24px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/></svg></div>
+                            <div class="brand-logo-icon" style="width:24px; height:24px;"><svg width="14" height="14"
+                                    viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <circle cx="12" cy="12" r="10" />
+                                    <path d="M2 12h20" />
+                                </svg></div>
                             <span>Scoresh</span>
                         </div>
                         <div class="footer-tagline">“Your tournament. Your score. Your game.”</div>
                     </div>
                     <div class="footer-desc">
-                        Scoresh is a dynamic cricket tournament management platform that powers local, school, college, and club cricket with Role-Based Access Control and live ball-by-ball scoring.
+                        Scoresh is a dynamic cricket tournament management platform with Role-Based Access Control and
+                        live ball-by-ball scoring.
                     </div>
                 </div>
 
@@ -721,9 +892,11 @@
                         <span class="host-only-control">•</span>
                         <span class="footer-link" data-action="export-json">Export Backup (JSON)</span>
                         <span>•</span>
-                        <span class="footer-link host-only-control" data-action="trigger-import">Import Backup (JSON)</span>
+                        <span class="footer-link host-only-control" data-action="trigger-import">Import Backup
+                            (JSON)</span>
                         <span class="host-only-control">•</span>
-                        <span class="footer-link text-red host-only-control" data-action="clear-all-data">Reset Platform</span>
+                        <span class="footer-link text-red host-only-control" data-action="clear-all-data">Reset
+                            Platform</span>
                     </div>
                 </div>
             </div>
@@ -738,75 +911,91 @@
     <!-- Hidden file input for JSON import -->
     <input type="file" id="import-json-file-input" accept=".json" style="display:none;">
 
-    <!-- 0. AUTHENTICATION MODAL (LOGIN & REGISTER WITH ROLE SELECTION) -->
+    <!-- 0. AUTHENTICATION MODAL (HOST vs PARTICIPANT) -->
     <div class="modal-backdrop" id="auth-modal">
-        <div class="modal-window" style="max-width:440px;">
+        <div class="modal-window" style="max-width:460px;">
             <div class="modal-header">
-                <h2>Scoresh Account & Role</h2>
+                <h2>Scoresh Access & Login</h2>
                 <button class="btn-close-modal" data-close-modal>&times;</button>
             </div>
-            
+
             <div class="auth-tabs-header">
-                <button class="auth-tab-btn active" id="auth-tab-login" onclick="window.ScoreshModals.setAuthTab('login')">Login</button>
-                <button class="auth-tab-btn" id="auth-tab-register" onclick="window.ScoreshModals.setAuthTab('register')">Register New Account</button>
+                <button class="auth-tab-btn active" id="auth-tab-host"
+                    onclick="window.ScoreshModals.setAuthMode('host')">Host Login 👑</button>
+                <button class="auth-tab-btn" id="auth-tab-participant"
+                    onclick="window.ScoreshModals.setAuthMode('participant')">Participant Login 🏏</button>
             </div>
 
             <div class="modal-body">
-                <!-- Login Panel -->
-                <div id="auth-panel-login">
-                    <form id="auth-form-login">
+                <!-- Host Login Panel -->
+                <div id="auth-panel-host">
+                    <div style="background-color:var(--color-green-light); border:1px solid #86efac; padding:0.65rem 0.85rem; border-radius:var(--radius-sm); margin-bottom:1rem; font-size:0.85rem; color:var(--color-green-dark);">
+                        👑 <strong>Host Access:</strong> Create tournaments, schedule fixtures, record ball deliveries & manage squads.
+                    </div>
+                    <form id="auth-form-host">
                         <div class="form-group">
-                            <label class="form-label">Email / Username</label>
-                            <input type="text" id="auth-login-email" class="form-input" placeholder="e.g. host@scoresh.com" required value="host@scoresh.com">
+                            <label class="form-label">Host Email / Username</label>
+                            <input type="text" id="auth-host-email" class="form-input"
+                                placeholder="e.g. host@scoresh.com" required value="host@scoresh.com">
                         </div>
                         <div class="form-group">
-                            <label class="form-label">Password</label>
-                            <input type="password" id="auth-login-pass" class="form-input" placeholder="••••••••" required value="password123">
+                            <label class="form-label">Host Password</label>
+                            <input type="password" id="auth-host-pass" class="form-input" placeholder="••••••••"
+                                required value="host123">
                         </div>
-                        <button type="submit" class="btn btn-primary" style="width:100%; margin-top:0.5rem;">Login to Scoresh &rarr;</button>
+                        <button type="submit" class="btn btn-primary" style="width:100%; margin-top:0.5rem;">Login as Host &rarr;</button>
                     </form>
                 </div>
 
-                <!-- Register Panel -->
-                <div id="auth-panel-register" style="display:none;">
-                    <form id="auth-form-register">
+                <!-- Participant Login Panel -->
+                <div id="auth-panel-participant" style="display:none;">
+                    <div style="background-color:var(--color-blue-light); border:1px solid #93c5fd; padding:0.65rem 0.85rem; border-radius:var(--radius-sm); margin-bottom:1rem; font-size:0.85rem; color:var(--color-blue);">
+                        🏏 <strong>Participant Access:</strong> Follow live matches, view real-time scorecards, commentary & tournament statistics (Read-only).
+                    </div>
+                    <form id="auth-form-participant">
                         <div class="form-group">
-                            <label class="form-label">Full Name</label>
-                            <input type="text" id="auth-reg-name" class="form-input" placeholder="e.g. Rahul Sharma" required>
+                            <label class="form-label">Your Name / Nickname</label>
+                            <input type="text" id="auth-part-name" class="form-input" placeholder="e.g. Cricket Fan" required value="Cricket Fan">
                         </div>
-                        <div class="form-group">
-                            <label class="form-label">Email Address</label>
-                            <input type="email" id="auth-reg-email" class="form-input" placeholder="e.g. rahul@example.com" required>
-                        </div>
-                        <div class="form-group">
-                            <label class="form-label">Password</label>
-                            <input type="password" id="auth-reg-pass" class="form-input" placeholder="Create password" required>
-                        </div>
-                        <div class="form-group">
-                            <label class="form-label">Select Account Role *</label>
-                            <div class="role-radio-box">
-                                <label class="role-radio-label">
-                                    <input type="radio" name="auth_reg_role" value="host" checked>
-                                    <div>
-                                        <strong>HOST</strong>
-                                        <div class="text-xs text-muted">Create & manage tournaments</div>
-                                    </div>
-                                </label>
-                                <label class="role-radio-label">
-                                    <input type="radio" name="auth_reg_role" value="participant">
-                                    <div>
-                                        <strong>PARTICIPANT</strong>
-                                        <div class="text-xs text-muted">View scores & standings</div>
-                                    </div>
-                                </label>
-                            </div>
-                        </div>
-                        <button type="submit" class="btn btn-accent" style="width:100%; margin-top:0.5rem;">Create Account &rarr;</button>
+                        <button type="submit" class="btn btn-accent" style="width:100%; margin-top:0.5rem;">Enter as Participant &rarr;</button>
                     </form>
                 </div>
             </div>
         </div>
     </div>
+
+
+    <!-- 0B. HOST SECURITY / CHANGE PASSWORD MODAL -->
+    <div class="modal-backdrop" id="security-modal">
+        <div class="modal-window" style="max-width:440px;">
+            <div class="modal-header">
+                <h2>Host Password & Security</h2>
+                <button class="btn-close-modal" data-close-modal>&times;</button>
+            </div>
+            <form id="modal-security-form">
+                <div class="modal-body">
+                    <p class="text-xs text-muted" style="margin-bottom:1rem;">Change your custom host password for live tournament scoring authentication.</p>
+                    <div class="form-group">
+                        <label class="form-label">Current Host Password *</label>
+                        <input type="password" id="sec-curr-pass" class="form-input" placeholder="Current password" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">New Password *</label>
+                        <input type="password" id="sec-new-pass" class="form-input" placeholder="At least 4 characters" required minlength="4">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Confirm New Password *</label>
+                        <input type="password" id="sec-conf-pass" class="form-input" placeholder="Re-enter new password" required minlength="4">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-close-modal>Cancel</button>
+                    <button type="submit" class="btn btn-accent">Update Password</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
 
 
     <!-- 1. TOURNAMENT SETUP WIZARD MODAL (HOST ONLY) -->
@@ -816,7 +1005,7 @@
                 <h2>Tournament Setup Wizard</h2>
                 <button class="btn-close-modal" data-close-modal>&times;</button>
             </div>
-            
+
             <div class="wizard-steps-header">
                 <div class="wizard-step-indicator active" data-step="1">
                     <span class="step-num-badge">1</span> <span>Details</span>
@@ -839,17 +1028,20 @@
                         <div class="form-grid-3">
                             <div class="form-group" style="grid-column: span 2;">
                                 <label class="form-label" for="wiz-name">Tournament Name *</label>
-                                <input type="text" id="wiz-name" class="form-input" placeholder="e.g. Summer Cricket Cup 2026" required autocomplete="off">
+                                <input type="text" id="wiz-name" class="form-input"
+                                    placeholder="e.g. Summer Cricket Cup 2026" required autocomplete="off">
                             </div>
                             <div class="form-group">
                                 <label class="form-label" for="wiz-logo">Logo / Icon</label>
-                                <input type="text" id="wiz-logo" class="form-input" value="🏆" placeholder="Emoji or icon">
+                                <input type="text" id="wiz-logo" class="form-input" value="🏆"
+                                    placeholder="Emoji or icon">
                             </div>
                         </div>
 
                         <div class="form-group">
                             <label class="form-label" for="wiz-desc">Description</label>
-                            <input type="text" id="wiz-desc" class="form-input" placeholder="Brief tournament overview or tagline...">
+                            <input type="text" id="wiz-desc" class="form-input"
+                                placeholder="Brief tournament description...">
                         </div>
 
                         <div class="form-grid-2">
@@ -865,14 +1057,16 @@
                             </div>
                             <div class="form-group">
                                 <label class="form-label" for="wiz-overs">Overs per Innings</label>
-                                <input type="number" id="wiz-overs" class="form-input font-mono" min="1" max="100" value="20" required>
+                                <input type="number" id="wiz-overs" class="form-input font-mono" min="1" max="100"
+                                    value="20" required>
                             </div>
                         </div>
 
                         <div class="form-grid-2">
                             <div class="form-group">
                                 <label class="form-label" for="wiz-location">Location / Venue</label>
-                                <input type="text" id="wiz-location" class="form-input" placeholder="e.g. Rajahmundry Grounds">
+                                <input type="text" id="wiz-location" class="form-input"
+                                    placeholder="e.g. City Cricket Stadium">
                             </div>
                             <div class="form-group">
                                 <label class="form-label" for="wiz-organizer">Organizer / Host</label>
@@ -893,21 +1087,27 @@
 
                         <div class="form-group">
                             <label class="form-label" for="wiz-rules">Tournament Rules & Guidelines</label>
-                            <input type="text" id="wiz-rules" class="form-input" value="Standard ICC / Local League Rules">
+                            <input type="text" id="wiz-rules" class="form-input"
+                                value="Standard ICC / Local League Rules">
                         </div>
                     </form>
                 </div>
 
                 <!-- Step 2: Teams -->
                 <div class="wizard-step-panel" data-step="2" style="display:none;">
-                    <div style="background-color:var(--bg-subtle); padding:1rem; border-radius:var(--radius-sm); margin-bottom:1rem;">
+                    <div
+                        style="background-color:var(--bg-subtle); padding:1rem; border-radius:var(--radius-sm); margin-bottom:1rem;">
                         <h4 style="font-size:0.9rem; margin-bottom:0.6rem;">Add Tournament Team</h4>
                         <div class="form-grid-3">
-                            <input type="text" id="wiz-team-name" class="form-input" placeholder="Team Name (e.g. Thunder XI)">
-                            <input type="text" id="wiz-team-short" class="form-input" placeholder="Short Code (e.g. THX)">
+                            <input type="text" id="wiz-team-name" class="form-input"
+                                placeholder="Team Name (e.g. Thunder XI)">
+                            <input type="text" id="wiz-team-short" class="form-input"
+                                placeholder="Short Code (e.g. THX)">
                             <div style="display:flex; gap:0.4rem;">
-                                <input type="color" id="wiz-team-color" value="#16a34a" style="height:38px; width:44px; border:1px solid var(--border-color); border-radius:4px; padding:2px; cursor:pointer;">
-                                <button type="button" class="btn btn-primary btn-sm" id="wiz-add-team-btn">+ Add</button>
+                                <input type="color" id="wiz-team-color" value="#16a34a"
+                                    style="height:38px; width:44px; border:1px solid var(--border-color); border-radius:4px; padding:2px; cursor:pointer;">
+                                <button type="button" class="btn btn-primary btn-sm" id="wiz-add-team-btn">+
+                                    Add</button>
                             </div>
                         </div>
                     </div>
@@ -916,8 +1116,12 @@
 
                 <!-- Step 3: Squads -->
                 <div class="wizard-step-panel" data-step="3" style="display:none;">
-                    <div style="background-color:var(--bg-subtle); padding:1rem; border-radius:var(--radius-sm); margin-bottom:1rem;">
-                        <h4 style="font-size:0.9rem; margin-bottom:0.6rem;">Add Player to Team Squad</h4>
+                    <div
+                        style="background-color:var(--bg-subtle); padding:1rem; border-radius:var(--radius-sm); margin-bottom:1rem;">
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.6rem;">
+                            <h4 style="font-size:0.9rem; margin:0;">Add Player to Team Squad</h4>
+                            <span id="wiz-squad-counter" class="badge-nonstrike">0/20 Players (Min: 11, Max: 20)</span>
+                        </div>
                         <div class="form-group">
                             <label class="form-label">Select Team</label>
                             <select id="wiz-player-team-select" class="form-select"></select>
@@ -930,23 +1134,29 @@
                                 <option value="All-rounder">All-rounder</option>
                                 <option value="Wicketkeeper">Wicketkeeper</option>
                             </select>
-                            <input type="text" id="wiz-player-jersey" class="form-input" placeholder="Jersey # (e.g. 18, 7)">
+                            <input type="text" id="wiz-player-jersey" class="form-input"
+                                placeholder="Jersey # (e.g. 18, 7)">
                         </div>
-                        <div class="form-grid-2" style="margin-top:0.6rem;">
+                        <div class="form-grid-3" style="margin-top:0.6rem;">
                             <select id="wiz-player-bat-style" class="form-select">
                                 <option value="Right-hand bat">Right-hand bat</option>
                                 <option value="Left-hand bat">Left-hand bat</option>
                             </select>
-                            <div style="display:flex; gap:0.4rem;">
-                                <select id="wiz-player-bowl-style" class="form-select">
-                                    <option value="Right-arm medium">Right-arm medium</option>
-                                    <option value="Right-arm fast">Right-arm fast</option>
-                                    <option value="Right-arm spin">Right-arm spin</option>
-                                    <option value="Left-arm fast">Left-arm fast</option>
-                                    <option value="Left-arm spin">Left-arm spin</option>
-                                    <option value="None">None</option>
-                                </select>
-                                <button type="button" class="btn btn-primary btn-sm" id="wiz-add-player-btn">+ Add</button>
+                            <select id="wiz-player-bowl-style" class="form-select">
+                                <option value="Right-arm medium">Right-arm medium</option>
+                                <option value="Right-arm fast">Right-arm fast</option>
+                                <option value="Right-arm spin">Right-arm spin</option>
+                                <option value="Left-arm fast">Left-arm fast</option>
+                                <option value="Left-arm spin">Left-arm spin</option>
+                                <option value="None">None</option>
+                            </select>
+                            <div style="display:flex; align-items:center; gap:0.4rem;">
+                                <label
+                                    style="display:flex; align-items:center; gap:0.3rem; font-size:0.8rem; font-weight:600; cursor:pointer;">
+                                    <input type="checkbox" id="wiz-player-is-wk"> Wicketkeeper
+                                </label>
+                                <button type="button" class="btn btn-primary btn-sm" id="wiz-add-player-btn"
+                                    style="margin-left:auto;">+ Add</button>
                             </div>
                         </div>
                     </div>
@@ -955,15 +1165,18 @@
 
                 <!-- Step 4: Schedule -->
                 <div class="wizard-step-panel" data-step="4" style="display:none;">
-                    <p class="text-sm text-muted" style="margin-bottom:1rem;">Generated round-robin fixture schedule for registered teams:</p>
+                    <p class="text-sm text-muted" style="margin-bottom:1rem;">Generated round-robin fixture schedule for
+                        registered teams:</p>
                     <div id="wiz-fixtures-list" style="max-height:260px; overflow-y:auto;"></div>
                 </div>
             </div>
 
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" id="wiz-prev-btn" style="display:none;">&larr; Back</button>
+                <button type="button" class="btn btn-secondary" id="wiz-prev-btn" style="display:none;">&larr;
+                    Back</button>
                 <button type="button" class="btn btn-primary" id="wiz-next-btn">Next Step &rarr;</button>
-                <button type="button" class="btn btn-accent" id="wiz-finish-btn" style="display:none;">Create & Launch Tournament 🚀</button>
+                <button type="button" class="btn btn-accent" id="wiz-finish-btn" style="display:none;">Create & Launch
+                    Tournament 🚀</button>
             </div>
         </div>
     </div>
@@ -977,15 +1190,26 @@
                 <button class="btn-close-modal" data-close-modal>&times;</button>
             </div>
             <div class="modal-body">
-                <p class="text-xs text-muted" style="margin-bottom:1rem;">Select active Playing XI players for both teams before starting the match.</p>
+                <p class="text-xs text-muted" style="margin-bottom:1rem;">Select active Playing XI players for both
+                    teams before starting the match.</p>
                 <div class="form-grid-2">
                     <div>
-                        <h4 id="xi-team-a-name" style="font-size:0.95rem; margin-bottom:0.5rem; color:var(--color-green-dark);">Team A</h4>
-                        <div id="xi-team-a-list" style="max-height:260px; overflow-y:auto; border:1px solid var(--border-light); border-radius:var(--radius-sm); padding:0.5rem;"></div>
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.5rem;">
+                            <h4 id="xi-team-a-name" style="font-size:0.95rem; color:var(--color-green-dark); margin:0;">Team A</h4>
+                            <span id="xi-team-a-count" class="badge-nonstrike">0/11 Selected</span>
+                        </div>
+                        <div id="xi-team-a-list"
+                            style="max-height:260px; overflow-y:auto; border:1px solid var(--border-light); border-radius:var(--radius-sm); padding:0.5rem;">
+                        </div>
                     </div>
                     <div>
-                        <h4 id="xi-team-b-name" style="font-size:0.95rem; margin-bottom:0.5rem; color:var(--color-primary);">Team B</h4>
-                        <div id="xi-team-b-list" style="max-height:260px; overflow-y:auto; border:1px solid var(--border-light); border-radius:var(--radius-sm); padding:0.5rem;"></div>
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.5rem;">
+                            <h4 id="xi-team-b-name" style="font-size:0.95rem; color:var(--color-primary); margin:0;">Team B</h4>
+                            <span id="xi-team-b-count" class="badge-nonstrike">0/11 Selected</span>
+                        </div>
+                        <div id="xi-team-b-list"
+                            style="max-height:260px; overflow-y:auto; border:1px solid var(--border-light); border-radius:var(--radius-sm); padding:0.5rem;">
+                        </div>
                     </div>
                 </div>
             </div>
@@ -1050,7 +1274,7 @@
     </div>
 
 
-    <!-- 4. WICKET DISMISSAL MODAL -->
+    <!-- 4. STRUCTURED WICKET DISMISSAL MODAL -->
     <div class="modal-backdrop" id="wicket-modal">
         <div class="modal-window">
             <div class="modal-header">
@@ -1059,37 +1283,64 @@
             </div>
             <form id="modal-wicket-form">
                 <div class="modal-body">
+                    <!-- Batsman Dismissed -->
+                    <div class="form-group">
+                        <label class="form-label">Batsman Dismissed *</label>
+                        <select id="wicket-dismissed-batsman-select" class="form-select" required></select>
+                    </div>
+
+                    <!-- Current Bowler info badge -->
+                    <div
+                        style="background-color:var(--bg-subtle); padding:0.6rem 0.85rem; border-radius:var(--radius-sm); margin-bottom:1rem; display:flex; justify-content:space-between; font-size:0.85rem;">
+                        <span class="text-muted">Bowler:</span>
+                        <strong id="wicket-bowler-display">Bowler Name</strong>
+                    </div>
+
+                    <!-- Dismissal Type -->
                     <div class="form-group">
                         <label class="form-label">Dismissal Type *</label>
                         <select id="wicket-type-select" class="form-select" required>
                             <option value="Bowled">Bowled (b Bowler)</option>
                             <option value="Caught">Caught (c Fielder b Bowler)</option>
-                            <option value="Run Out">Run Out (run out Fielder)</option>
+                            <option value="Caught & Bowled">Caught & Bowled (c & b Bowler)</option>
                             <option value="LBW">LBW (lbw b Bowler)</option>
+                            <option value="Run Out">Run Out (run out Fielder)</option>
                             <option value="Stumped">Stumped (st WK b Bowler)</option>
                             <option value="Hit Wicket">Hit Wicket (hit wicket b Bowler)</option>
                             <option value="Retired Out">Retired Out</option>
+                            <option value="Obstructing the Field">Obstructing the Field</option>
+                            <option value="Other">Other Dismissal</option>
                         </select>
                     </div>
 
-                    <div class="form-group">
-                        <label class="form-label">Fielder Involved (Catch / Run out / Stumped)</label>
-                        <input type="text" id="wicket-fielder-name" class="form-input" placeholder="e.g. Fielder Name">
+                    <!-- Dynamic Fielder Dropdown for Caught & Run Out -->
+                    <div class="form-group" id="wicket-fielder-group" style="display:none;">
+                        <label class="form-label" id="wicket-fielder-label">Fielding Player (Bowling XI) *</label>
+                        <select id="wicket-fielder-select" class="form-select"></select>
                     </div>
 
+                    <!-- Dynamic Wicketkeeper Dropdown for Stumped -->
+                    <div class="form-group" id="wicket-wk-group" style="display:none;">
+                        <label class="form-label">Wicketkeeper (Bowling XI) *</label>
+                        <select id="wicket-wk-select" class="form-select"></select>
+                    </div>
+
+                    <!-- Incoming Batsman -->
                     <div class="form-group">
-                        <label class="form-label">Incoming Batsman *</label>
+                        <label class="form-label">Incoming Batter (Batting XI) *</label>
                         <select id="wicket-next-batsman-select" class="form-select" required></select>
                     </div>
 
+                    <!-- Optional Commentary -->
                     <div class="form-group">
-                        <label class="form-label">Commentary Description (Optional)</label>
-                        <input type="text" id="wicket-commentary-text" class="form-input" placeholder="e.g. Edged and taken cleanly!">
+                        <label class="form-label">Custom Commentary Note (Optional)</label>
+                        <input type="text" id="wicket-commentary-text" class="form-input"
+                            placeholder="e.g. Edged and taken cleanly at slip!">
                     </div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-close-modal>Cancel</button>
-                    <button type="submit" class="btn btn-danger">Confirm Wicket</button>
+                    <button type="submit" class="btn btn-danger">Confirm Wicket &rarr;</button>
                 </div>
             </form>
         </div>
@@ -1106,7 +1357,7 @@
             <form id="modal-change-bowler-form">
                 <div class="modal-body">
                     <div class="form-group">
-                        <label class="form-label">Select Next Bowler *</label>
+                        <label class="form-label">Select Next Bowler (Bowling XI) *</label>
                         <select id="change-bowler-select" class="form-select" required></select>
                     </div>
                 </div>
@@ -1119,6 +1370,25 @@
     </div>
 
 
+    <!-- 5B. OVER COMPLETE / NEXT BOWLER MODAL -->
+    <div class="modal-backdrop" id="next-bowler-modal">
+        <div class="modal-window" style="max-width:540px;">
+            <div class="modal-header">
+                <h2 id="next-bowler-modal-title">Over Complete — Select Next Bowler</h2>
+                <button class="btn-close-modal" data-close-modal>&times;</button>
+            </div>
+            <div class="modal-body">
+                <p id="next-bowler-prev-text" class="text-xs text-muted" style="margin-bottom:1rem;">Previous bowler cannot bowl consecutive overs.</p>
+                <div id="next-bowler-options-list" style="max-height:300px; overflow-y:auto;"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-close-modal>Close</button>
+            </div>
+        </div>
+    </div>
+
+
+
     <!-- 6. 2nd INNINGS START MODAL -->
     <div class="modal-backdrop" id="second-inn-modal">
         <div class="modal-window">
@@ -1128,7 +1398,8 @@
             </div>
             <form id="modal-second-inn-form">
                 <div class="modal-body">
-                    <div style="background-color:var(--bg-subtle); padding:0.75rem; border-radius:var(--radius-sm); margin-bottom:1rem; font-weight:700;" id="sec-target-badge">
+                    <div style="background-color:var(--bg-subtle); padding:0.75rem; border-radius:var(--radius-sm); margin-bottom:1rem; font-weight:700;"
+                        id="sec-target-badge">
                         Target: 0 runs
                     </div>
                     <div class="form-grid-2">
@@ -1166,7 +1437,8 @@
                 <div class="modal-body">
                     <div class="form-group">
                         <label class="form-label">Match Title</label>
-                        <input type="text" id="match-title-val" class="form-input" placeholder="e.g. League Match #3, Semi Final">
+                        <input type="text" id="match-title-val" class="form-input"
+                            placeholder="e.g. League Match #3, Semi Final">
                     </div>
                     <div class="form-grid-2">
                         <div class="form-group">
@@ -1181,7 +1453,8 @@
                     <div class="form-grid-2">
                         <div class="form-group">
                             <label class="form-label">Overs</label>
-                            <input type="number" id="match-overs-val" class="form-input font-mono" value="20" min="1" required>
+                            <input type="number" id="match-overs-val" class="form-input font-mono" value="20" min="1"
+                                required>
                         </div>
                         <div class="form-group">
                             <label class="form-label">Venue</label>
@@ -1200,7 +1473,8 @@
                     </div>
                     <div class="form-group">
                         <label class="form-label">Umpires (Optional)</label>
-                        <input type="text" id="match-umpires-val" class="form-input" placeholder="e.g. Umpire 1, Umpire 2">
+                        <input type="text" id="match-umpires-val" class="form-input"
+                            placeholder="e.g. Umpire 1, Umpire 2">
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -1212,7 +1486,40 @@
     </div>
 
 
-    <!-- 8. ADD / EDIT TEAM MODAL -->
+    <!-- 8. MATCH SUMMARY EDIT MODAL (HOST ONLY) -->
+    <div class="modal-backdrop" id="match-summary-modal">
+        <div class="modal-window">
+            <div class="modal-header">
+                <h2>Edit Match Summary</h2>
+                <button class="btn-close-modal" data-close-modal>&times;</button>
+            </div>
+            <form id="modal-summary-form">
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label class="form-label">Player of the Match</label>
+                        <input type="text" id="summary-potm-val" class="form-input" placeholder="e.g. Virat Kohli">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Official Result Summary</label>
+                        <input type="text" id="summary-result-val" class="form-input"
+                            placeholder="e.g. Team A won by 24 runs">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Custom Summary / Match Notes</label>
+                        <textarea id="summary-custom-text" class="form-input" rows="3"
+                            placeholder="Key moments, turning points, partnership highlights..."></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-close-modal>Cancel</button>
+                    <button type="submit" class="btn btn-accent">Save Summary</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+
+    <!-- 9. ADD / EDIT TEAM MODAL -->
     <div class="modal-backdrop" id="team-modal">
         <div class="modal-window">
             <div class="modal-header">
@@ -1223,16 +1530,19 @@
                 <div class="modal-body">
                     <div class="form-group">
                         <label class="form-label">Team Name *</label>
-                        <input type="text" id="modal-team-name" class="form-input" placeholder="e.g. Thunder XI" required>
+                        <input type="text" id="modal-team-name" class="form-input" placeholder="e.g. Thunder XI"
+                            required>
                     </div>
                     <div class="form-grid-2">
                         <div class="form-group">
                             <label class="form-label">Short Name (3-4 chars)</label>
-                            <input type="text" id="modal-team-short" class="form-input font-mono" placeholder="e.g. THX">
+                            <input type="text" id="modal-team-short" class="form-input font-mono"
+                                placeholder="e.g. THX">
                         </div>
                         <div class="form-group">
                             <label class="form-label">Team Color Theme</label>
-                            <input type="color" id="modal-team-color" value="#16a34a" style="height:42px; width:100%; border:1px solid var(--border-color); border-radius:4px; padding:2px; cursor:pointer;">
+                            <input type="color" id="modal-team-color" value="#16a34a"
+                                style="height:42px; width:100%; border:1px solid var(--border-color); border-radius:4px; padding:2px; cursor:pointer;">
                         </div>
                     </div>
                 </div>
@@ -1245,7 +1555,7 @@
     </div>
 
 
-    <!-- 9. ADD / EDIT PLAYER MODAL -->
+    <!-- 10. ADD / EDIT PLAYER MODAL -->
     <div class="modal-backdrop" id="player-modal">
         <div class="modal-window">
             <div class="modal-header">
@@ -1256,7 +1566,8 @@
                 <div class="modal-body">
                     <div class="form-group">
                         <label class="form-label">Player Name *</label>
-                        <input type="text" id="modal-player-name" class="form-input" placeholder="e.g. Rahul, Arjun..." required>
+                        <input type="text" id="modal-player-name" class="form-input" placeholder="e.g. Rahul Sharma"
+                            required>
                     </div>
                     <div class="form-grid-2">
                         <div class="form-group">
@@ -1276,7 +1587,8 @@
                     <div class="form-grid-3">
                         <div class="form-group">
                             <label class="form-label">Jersey #</label>
-                            <input type="text" id="modal-player-jersey" class="form-input font-mono" placeholder="e.g. 18, 7">
+                            <input type="text" id="modal-player-jersey" class="form-input font-mono"
+                                placeholder="e.g. 18, 7">
                         </div>
                         <div class="form-group">
                             <label class="form-label">Batting Style</label>
@@ -1297,6 +1609,12 @@
                             </select>
                         </div>
                     </div>
+                    <div class="form-group" style="margin-top:0.4rem;">
+                        <label
+                            style="display:flex; align-items:center; gap:0.4rem; cursor:pointer; font-size:0.9rem; font-weight:600;">
+                            <input type="checkbox" id="modal-player-is-wk"> Designate as Wicketkeeper
+                        </label>
+                    </div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-close-modal>Cancel</button>
@@ -1307,7 +1625,7 @@
     </div>
 
 
-    <!-- 10. CONFIRMATION MODAL -->
+    <!-- 11. CONFIRMATION MODAL -->
     <div class="modal-backdrop" id="confirm-modal">
         <div class="modal-window" style="max-width: 440px;">
             <div class="modal-header">
@@ -1315,7 +1633,8 @@
                 <button class="btn-close-modal" data-close-modal>&times;</button>
             </div>
             <div class="modal-body">
-                <p id="confirm-modal-msg" style="font-size:0.95rem; color:var(--color-secondary); line-height:1.5;">Are you sure you want to proceed?</p>
+                <p id="confirm-modal-msg" style="font-size:0.95rem; color:var(--color-secondary); line-height:1.5;">Are
+                    you sure you want to proceed?</p>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-close-modal>Cancel</button>
@@ -1338,4 +1657,5 @@
     <script src="js/ui.js"></script>
     <script src="js/app.js"></script>
 </body>
+
 </html>

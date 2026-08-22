@@ -3,6 +3,7 @@
  * Renders dynamic views adapted for Role-Based Access Control (Host vs Participant),
  * tournament dashboards, live ball scoring, commentary timelines, derived scorecards,
  * fall of wickets, partnerships, points tables, and tournament records.
+ * Uses 100% real dynamic player bindings with clean empty states.
  */
 
 const ScoreshUI = {
@@ -76,13 +77,18 @@ const ScoreshUI = {
                     <span class="font-bold text-xs">${user.role.toUpperCase()}</span>
                     <span class="user-name-text">${user.name.split(' ')[0]}</span>
                 </div>
+                ${user.role === 'host' ? `
+                    <button class="btn btn-secondary btn-sm" onclick="window.ScoreshModals.openSecurityModal()" title="Host Password & Security">
+                        🔒 Security
+                    </button>
+                ` : ''}
                 <button class="btn btn-secondary btn-sm" onclick="window.authService.switchRole('${user.role === 'host' ? 'participant' : 'host'}'); window.scoreState.notify();" title="Switch Role (Testing)">
                     Switch to ${user.role === 'host' ? 'Participant' : 'Host'}
                 </button>
             `;
         } else {
             pill.innerHTML = `
-                <button class="btn btn-primary btn-sm" onclick="window.ScoreshModals.openAuthModal('login')">Login / Register</button>
+                <button class="btn btn-primary btn-sm" onclick="window.ScoreshModals.openAuthModal('host')">Host / Participant Login</button>
             `;
         }
     },
@@ -140,7 +146,7 @@ const ScoreshUI = {
         if (hostWelcomeNotice) {
             hostWelcomeNotice.textContent = state.isHost
                 ? 'Do you have a new tournament to create?'
-                : 'Welcome, Cricket Participant! Select a tournament to view live scores and standings.';
+                : 'Welcome, Cricket Participant! Select a tournament to follow live matches and scores.';
         }
 
         if (existingCard && list) {
@@ -240,8 +246,8 @@ const ScoreshUI = {
             grid.innerHTML = `
                 <div class="empty-state-card" style="grid-column: 1 / -1;">
                     <div class="empty-icon">🏆</div>
-                    <h3 class="empty-title">No Tournaments Found</h3>
-                    <p class="empty-desc">Create your first cricket tournament to begin organizing teams and matches.</p>
+                    <h3 class="empty-title">No Tournaments Yet</h3>
+                    <p class="empty-desc">Create your first tournament to get started with teams, squads, and matches.</p>
                     <div class="host-only-control">
                         <button class="btn btn-accent" onclick="window.tournamentWizard.open()">+ Create Tournament</button>
                     </div>
@@ -343,6 +349,9 @@ const ScoreshUI = {
                                 <button class="btn btn-accent btn-sm" onclick="window.scoreState.selectMatch('${m.id}', 'live')">${state.isHost ? 'Live Scoring Pad' : 'View Live Match'} &rarr;</button>
                             ` : ''}
                             <button class="btn btn-secondary btn-sm" onclick="window.scoreState.selectMatch('${m.id}', 'scorecard')">Scorecard</button>
+                            ${state.isHost && (m.status === 'completed' || m.status === 'live') ? `
+                                <button class="btn btn-secondary btn-sm" onclick="window.ScoreshModals.openMatchSummaryEditModal('${m.id}')">Edit Summary</button>
+                            ` : ''}
                         </div>
                         ${state.isHost ? `
                             <button class="btn-action-sm btn-action-delete" onclick="window.ScoreshModals.confirm('Delete Match', 'Delete ${m.title}?', 'Delete', () => window.scoreState.deleteMatch('${tournament.id}', '${m.id}'))">Delete</button>
@@ -353,7 +362,7 @@ const ScoreshUI = {
         }).join('');
     },
 
-    // --- 5. TEAMS & SQUADS VIEW ---
+    // --- 5. TEAMS & SQUADS VIEW (STRICT TEAM ISOLATION & SQUAD LIMITS) ---
     renderTeamsView(state) {
         const container = document.getElementById('teams-grid-container');
         if (!container) return;
@@ -364,7 +373,7 @@ const ScoreshUI = {
                 <div class="empty-state-card" style="grid-column: 1 / -1;">
                     <div class="empty-icon">👥</div>
                     <h3 class="empty-title">No Teams Registered</h3>
-                    <p class="empty-desc">Register teams to build your tournament competition.</p>
+                    <p class="empty-desc">Register teams (11 to 20 players each) to build your tournament competition.</p>
                     ${state.isHost ? `<button class="btn btn-accent" onclick="window.ScoreshModals.openAddTeamModal()">+ Add Team</button>` : ''}
                 </div>
             `;
@@ -372,26 +381,28 @@ const ScoreshUI = {
         }
 
         container.innerHTML = tournament.teams.map(team => {
+            // Strict Team Isolation: only players belonging to this team
             const players = tournament.getTeamPlayers(team.id);
+            const isValid = players.length >= 11 && players.length <= 20;
 
             return `
                 <div class="team-squad-card" style="border-top: 4px solid ${team.color};">
                     <div class="team-squad-header">
                         <div>
                             <h3 style="font-size:1.15rem; font-weight:800;">${team.name}</h3>
-                            <span class="text-xs text-muted">Short Code: <strong>${team.shortName}</strong> • ${players.length} Players</span>
+                            <span class="text-xs text-muted">Short Code: <strong>${team.shortName}</strong> • <span class="${isValid ? 'badge-strike' : 'badge-nonstrike'}" style="font-size:0.7rem;">${players.length}/20 Players</span></span>
                         </div>
                         ${state.isHost ? `
-                            <button class="btn-action-sm" onclick="window.ScoreshModals.openAddPlayerModal('${team.id}')">+ Player</button>
+                            <button class="btn-action-sm" onclick="window.ScoreshModals.openAddPlayerModal('${team.id}')" ${players.length >= 20 ? 'disabled' : ''}>+ Player</button>
                         ` : ''}
                     </div>
 
                     <div class="squad-players-list">
-                        ${players.length === 0 ? '<p class="text-xs text-muted" style="padding:0.5rem 0;">No squad players added yet.</p>' : players.map(p => `
+                        ${players.length === 0 ? '<p class="text-xs text-muted" style="padding:0.5rem 0;">No squad players added yet. (Min: 11, Max: 20)</p>' : players.map(p => `
                             <div class="squad-player-item">
                                 <div>
                                     <strong>${p.name}</strong>
-                                    <span class="text-xs text-muted" style="margin-left:0.35rem;">(#${p.jersey || '—'})</span>
+                                    <span class="text-xs text-muted" style="margin-left:0.35rem;">(#${p.jersey || '—'}${p.isWicketkeeper ? ' • WK' : ''})</span>
                                 </div>
                                 <div style="display:flex; align-items:center; gap:0.4rem;">
                                     <span class="text-xs text-muted">${p.role}</span>
@@ -428,7 +439,7 @@ const ScoreshUI = {
             return `
                 <tr>
                     <td class="font-mono text-muted">${index + 1}</td>
-                    <td><strong>${p.name}</strong></td>
+                    <td><strong>${p.name}</strong> ${p.isWicketkeeper ? '<span class="badge-nonstrike">WK</span>' : ''}</td>
                     <td>${team ? `<span style="display:inline-flex; align-items:center; gap:0.4rem;"><span style="width:8px; height:8px; border-radius:50%; background-color:${team.color}; display:inline-block;"></span>${team.name}</span>` : '<span class="text-muted">Unassigned</span>'}</td>
                     <td><span class="badge-strike">${p.role}</span></td>
                     <td class="font-mono">${p.jersey || '—'}</td>
@@ -443,7 +454,7 @@ const ScoreshUI = {
         }).join('');
     },
 
-    // --- 7. LIVE MATCH SCORING VIEW ---
+    // --- 7. LIVE MATCH SCORING VIEW (STRICT REAL PLAYER NAMES) ---
     renderLiveMatchView(state) {
         const emptyState = document.getElementById('live-no-match-empty');
         const content = document.getElementById('live-active-match-content');
@@ -459,6 +470,8 @@ const ScoreshUI = {
         if (content) content.style.display = 'block';
 
         const inn = match.currentInnings;
+        const tournament = state.activeTournament;
+
         document.getElementById('live-match-header-title').textContent = `${match.title} (${match.status.toUpperCase()})`;
         document.getElementById('live-match-header-venue').textContent = `📍 ${match.venue} • Format: ${match.matchFormat} (${match.totalOvers} ov)`;
 
@@ -490,29 +503,74 @@ const ScoreshUI = {
             if (rrrContainer) rrrContainer.style.display = 'none';
         }
 
-        // Active Crease Batsmen & Bowler
-        const striker = inn.batsmen.find(b => b.isOnStrike && !b.isOut);
-        const nonStriker = inn.batsmen.find(b => b.isNonStriker && !b.isOut);
-        const bowler = inn.bowlers.find(b => b.isCurrentBowler);
+        // Resolve Active Crease Batsmen & Bowler strictly from IDs & Player database
+        const cleanStrikerId = inn.strikerId ? String(inn.strikerId).replace(/^bat_/, '') : null;
+        const cleanNonStrikerId = inn.nonStrikerId ? String(inn.nonStrikerId).replace(/^bat_/, '') : null;
+        const cleanBowlerId = inn.currentBowlerId ? String(inn.currentBowlerId).replace(/^bowl_/, '') : null;
 
-        document.getElementById('live-striker-name').textContent = striker ? striker.name : '—';
+        const strikerPlr = cleanStrikerId ? (tournament ? tournament.getPlayer(cleanStrikerId) : (window.getPlayerById ? window.getPlayerById(cleanStrikerId) : null)) : null;
+        const nonStrikerPlr = cleanNonStrikerId ? (tournament ? tournament.getPlayer(cleanNonStrikerId) : (window.getPlayerById ? window.getPlayerById(cleanNonStrikerId) : null)) : null;
+        const bowlerPlr = cleanBowlerId ? (tournament ? tournament.getPlayer(cleanBowlerId) : (window.getPlayerById ? window.getPlayerById(cleanBowlerId) : null)) : null;
+
+        const striker = inn.batsmen.find(b => (b.playerId === cleanStrikerId || b.id === 'bat_' + cleanStrikerId || b.id === cleanStrikerId) && !b.isOut) || inn.batsmen.find(b => b.isOnStrike && !b.isOut);
+        const nonStriker = inn.batsmen.find(b => (b.playerId === cleanNonStrikerId || b.id === 'bat_' + cleanNonStrikerId || b.id === cleanNonStrikerId) && !b.isOut) || inn.batsmen.find(b => b.isNonStriker && !b.isOut);
+        const bowler = inn.bowlers.find(b => (b.playerId === cleanBowlerId || b.id === 'bowl_' + cleanBowlerId || b.id === cleanBowlerId)) || inn.bowlers.find(b => b.isCurrentBowler);
+
+        const strikerName = strikerPlr ? strikerPlr.name : (striker && striker.name ? striker.name : '—');
+        const nonStrikerName = nonStrikerPlr ? nonStrikerPlr.name : (nonStriker && nonStriker.name ? nonStriker.name : '—');
+        const bowlerName = bowlerPlr ? bowlerPlr.name : (bowler && bowler.name ? bowler.name : '—');
+
+        document.getElementById('live-striker-name').textContent = strikerName;
         document.getElementById('live-striker-runs').textContent = striker ? striker.runs : '0';
         document.getElementById('live-striker-balls').textContent = striker ? striker.balls : '0';
         document.getElementById('live-striker-fours').textContent = striker ? striker.fours : '0';
         document.getElementById('live-striker-sixes').textContent = striker ? striker.sixes : '0';
         document.getElementById('live-striker-sr').textContent = striker ? `SR ${window.ScoreshCalculations.formatStat(striker.strikeRate)}` : 'SR 0.00';
 
-        document.getElementById('live-nonstriker-name').textContent = nonStriker ? nonStriker.name : '—';
+        document.getElementById('live-nonstriker-name').textContent = nonStrikerName;
         document.getElementById('live-nonstriker-runs').textContent = nonStriker ? nonStriker.runs : '0';
         document.getElementById('live-nonstriker-balls').textContent = nonStriker ? nonStriker.balls : '0';
         document.getElementById('live-nonstriker-sr').textContent = nonStriker ? `SR ${window.ScoreshCalculations.formatStat(nonStriker.strikeRate)}` : 'SR 0.00';
 
-        document.getElementById('live-bowler-name').textContent = bowler ? bowler.name : '—';
+        document.getElementById('live-bowler-name').textContent = bowlerName;
         document.getElementById('live-bowler-wkts').textContent = bowler ? bowler.wkttkn : '0';
         document.getElementById('live-bowler-runs').textContent = bowler ? bowler.runsgv : '0';
         document.getElementById('live-bowler-overs').textContent = bowler ? bowler.overs : '0.0';
         document.getElementById('live-bowler-maidens').textContent = bowler ? bowler.maidens : '0';
         document.getElementById('live-bowler-econ').textContent = bowler ? `Econ ${window.ScoreshCalculations.formatStat(bowler.economy)}` : 'Econ 0.00';
+
+        // Winning Probability Widget Update
+        const winProb = window.ScoreshCalculations.calculateWinningProbability(match, inn);
+        const probEqEl = document.getElementById('live-prob-equation');
+        if (probEqEl) probEqEl.textContent = winProb.equationText;
+
+        const probBarA = document.getElementById('live-prob-bar-a');
+        const probBarB = document.getElementById('live-prob-bar-b');
+        const probLabelA = document.getElementById('live-prob-label-a');
+        const probLabelB = document.getElementById('live-prob-label-b');
+
+        if (probBarA && probBarB) {
+            probBarA.style.width = `${winProb.teamAProb}%`;
+            probBarB.style.width = `${winProb.teamBProb}%`;
+            if (probLabelA) probLabelA.textContent = `${winProb.teamAName} ${winProb.teamAProb}%`;
+            if (probLabelB) probLabelB.textContent = `${winProb.teamBName} ${winProb.teamBProb}%`;
+        }
+
+        const runsReqEl = document.getElementById('live-prob-runs-req');
+        const ballsLeftEl = document.getElementById('live-prob-balls-left');
+        const rrrEl = document.getElementById('live-prob-rrr');
+        const crrEl = document.getElementById('live-prob-crr');
+
+        if (runsReqEl) runsReqEl.textContent = winProb.runsRequired !== null ? `${winProb.runsRequired} runs` : '—';
+        if (ballsLeftEl) ballsLeftEl.textContent = winProb.ballsRemaining !== null ? `${winProb.ballsRemaining}` : '—';
+        if (rrrEl) rrrEl.textContent = winProb.requiredRunRate !== null ? window.ScoreshCalculations.formatStat(winProb.requiredRunRate) : '—';
+        if (crrEl) crrEl.textContent = window.ScoreshCalculations.formatStat(winProb.currentRunRate);
+
+        // Embedded Live Scorecard Container
+        const embeddedScorecard = document.getElementById('live-embedded-scorecard-container');
+        if (embeddedScorecard) {
+            embeddedScorecard.innerHTML = this.buildScorecardHTML(match, tournament, state.isHost);
+        }
 
         // Innings break / Match completed banners
         const breakBanner = document.getElementById('live-innings-break-banner');
@@ -552,12 +610,12 @@ const ScoreshUI = {
                 }).join('');
         }
 
-        // Ball-by-ball commentary timeline
+        // Ball-by-ball commentary timeline (Using actual historical player names from delivery object)
         const commFeed = document.getElementById('live-commentary-feed');
         if (commFeed) {
             const logs = [...inn.ballLog].reverse();
             commFeed.innerHTML = logs.length === 0
-                ? '<p class="text-xs text-muted" style="padding:1rem 0;">No balls bowled in this innings yet.</p>'
+                ? '<p class="text-xs text-muted" style="padding:1rem 0;">No deliveries bowled in this innings yet.</p>'
                 : logs.map(d => `
                     <div class="commentary-item">
                         <span class="commentary-over">${d.displayOverNumber}</span>
@@ -570,37 +628,37 @@ const ScoreshUI = {
         }
     },
 
-    // --- 8. FULL MATCH SCORECARD VIEW ---
-    renderScorecardView(state) {
-        const container = document.getElementById('scorecard-full-container');
-        if (!container) return;
-
-        const match = state.activeMatch;
+    // --- REUSABLE COMPLETE SCORECARD GENERATOR ---
+    buildScorecardHTML(match, tournament, isHost = false) {
         if (!match) {
-            container.innerHTML = `<div class="empty-state-card"><p class="text-muted">No match selected to view scorecard.</p></div>`;
-            return;
+            return `<div class="empty-state-card"><p class="text-muted">No match data available.</p></div>`;
         }
 
         const renderInningsTable = (inn, innNumber) => {
-            if (!inn || inn.batsmen.length === 0) {
+            if (!inn || (!inn.batsmen || inn.batsmen.length === 0) && inn.legalBalls === 0) {
                 return `
                     <div class="table-wrapper" style="padding:1.5rem; margin-bottom:1.5rem;">
-                        <h3 style="font-size:1.15rem; font-weight:700;">Innings ${innNumber}: ${inn.battingTeamName || 'Team'}</h3>
-                        <p class="text-sm text-muted">Innings not started yet.</p>
+                        <h3 style="font-size:1.15rem; font-weight:700;">Innings ${innNumber}: ${inn ? inn.battingTeamName : 'Team'}</h3>
+                        <p class="text-sm text-muted">Innings not started yet. Batting side is ready to begin.</p>
                     </div>
                 `;
             }
 
+            const targetInfo = inn.target ? ` • Target: ${inn.target}` : '';
+            const rrrInfo = inn.target && !inn.isCompleted
+                ? ` • Req RR: ${window.ScoreshCalculations.formatStat(window.ScoreshCalculations.calculateRequiredRunRate(inn.target, inn.totalRuns, match.totalOvers, inn.oversBowled))}`
+                : '';
+
             return `
                 <div class="table-wrapper" style="margin-bottom:1.5rem;">
-                    <div style="padding:1rem 1.25rem; background-color:var(--bg-card-subtle); border-bottom:1px solid var(--border-color); display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap;">
+                    <div style="padding:1rem 1.25rem; background-color:var(--bg-card-subtle); border-bottom:1px solid var(--border-color); display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.5rem;">
                         <div>
-                            <h3 style="font-size:1.2rem; font-weight:800;">${inn.battingTeamName} Innings</h3>
-                            <span class="text-xs text-muted">${inn.isCompleted ? 'Innings Completed' : 'Innings in progress'} • Target: ${inn.target || '—'}</span>
+                            <h3 style="font-size:1.2rem; font-weight:800; color:var(--color-primary);">${inn.battingTeamName} Innings</h3>
+                            <span class="text-xs text-muted">${inn.isCompleted ? 'Innings Completed' : 'Innings In Progress'}${targetInfo}${rrrInfo}</span>
                         </div>
-                        <div class="runs-highlight" style="font-size:1.8rem;">
+                        <div class="runs-highlight" style="font-size:1.75rem;">
                             ${inn.totalRuns} / <span class="text-green">${inn.totalWickets}</span>
-                            <span class="text-sm text-muted" style="font-weight:600;">(${inn.displayOvers} ov)</span>
+                            <span class="text-sm text-muted" style="font-weight:600;">(${inn.displayOvers} / ${match.totalOvers} ov, CRR: ${window.ScoreshCalculations.formatStat(inn.runRate)})</span>
                         </div>
                     </div>
 
@@ -619,17 +677,26 @@ const ScoreshUI = {
                                 </tr>
                             </thead>
                             <tbody>
-                                ${inn.batsmen.map(b => `
-                                    <tr class="${b.isOnStrike ? 'row-striker' : ''}">
-                                        <td><strong>${b.name}</strong> ${b.isOnStrike ? '<span class="badge-strike">★ Striker</span>' : (b.isNonStriker ? '<span class="badge-nonstrike">• Non-striker</span>' : '')}</td>
-                                        <td class="text-sm text-muted">${b.dismissal}</td>
-                                        <td class="text-right font-mono font-bold">${b.runs}</td>
-                                        <td class="text-right font-mono">${b.balls}</td>
-                                        <td class="text-right font-mono">${b.fours}</td>
-                                        <td class="text-right font-mono">${b.sixes}</td>
-                                        <td class="text-right font-mono text-green">${window.ScoreshCalculations.formatStat(b.strikeRate)}</td>
-                                    </tr>
-                                `).join('')}
+                                ${(inn.batsmen || []).length === 0 ? '<tr><td colspan="7" class="text-muted text-sm">No batters recorded yet</td></tr>' : inn.batsmen.map(b => {
+                                    const cleanPId = b.playerId || String(b.id).replace(/^bat_/, '');
+                                    const realPlr = tournament ? tournament.getPlayer(cleanPId) : (window.getPlayerById ? window.getPlayerById(cleanPId) : null);
+                                    const bName = realPlr ? realPlr.name : (b.name || 'Batter');
+
+                                    const isMatchStriker = (cleanPId === inn.strikerId || b.id === 'bat_' + inn.strikerId || b.id === inn.strikerId);
+                                    const isMatchNonStriker = (cleanPId === inn.nonStrikerId || b.id === 'bat_' + inn.nonStrikerId || b.id === inn.nonStrikerId);
+
+                                    return `
+                                        <tr class="${isMatchStriker && !b.isOut ? 'row-striker' : ''}">
+                                            <td><strong>${bName}</strong> ${isMatchStriker && !b.isOut ? '<span class="badge-strike">★ Striker</span>' : (isMatchNonStriker && !b.isOut ? '<span class="badge-nonstrike">• Non-striker</span>' : '')}</td>
+                                            <td class="text-sm text-muted">${b.dismissal || (b.isOut ? 'Out' : 'not out')}</td>
+                                            <td class="text-right font-mono font-bold">${b.runs}</td>
+                                            <td class="text-right font-mono">${b.balls}</td>
+                                            <td class="text-right font-mono">${b.fours}</td>
+                                            <td class="text-right font-mono">${b.sixes}</td>
+                                            <td class="text-right font-mono text-green">${window.ScoreshCalculations.formatStat(b.strikeRate)}</td>
+                                        </tr>
+                                    `;
+                                }).join('')}
                             </tbody>
                             <tfoot>
                                 <tr>
@@ -637,8 +704,8 @@ const ScoreshUI = {
                                     <td colspan="5" class="text-right font-mono font-bold">${inn.totalExtras}</td>
                                 </tr>
                                 <tr>
-                                    <td colspan="2"><strong>Total Runs:</strong></td>
-                                    <td colspan="5" class="text-right font-mono font-bold text-lg">${inn.totalRuns} / ${inn.totalWickets} (${inn.displayOvers} ov, CRR: ${window.ScoreshCalculations.formatStat(inn.runRate)})</td>
+                                    <td colspan="2"><strong>TOTAL:</strong></td>
+                                    <td colspan="5" class="text-right font-mono font-bold text-lg">${inn.totalRuns} / ${inn.totalWickets} <span class="text-sm font-normal text-muted">(${inn.displayOvers} ov, CRR: ${window.ScoreshCalculations.formatStat(inn.runRate)})</span></td>
                                 </tr>
                             </tfoot>
                         </table>
@@ -648,7 +715,7 @@ const ScoreshUI = {
                     <div style="padding:0.85rem 1.25rem; background-color:var(--bg-card-subtle); border-top:1px solid var(--border-light);">
                         <span class="text-xs font-bold uppercase text-muted">Fall of Wickets:</span>
                         <div class="text-sm" style="margin-top:0.25rem;">
-                            ${inn.fallOfWickets.length === 0 ? '<span class="text-muted">No wickets fallen</span>' : inn.fallOfWickets.map(f => `
+                            ${(inn.fallOfWickets || []).length === 0 ? '<span class="text-muted">No wickets fallen</span>' : inn.fallOfWickets.map(f => `
                                 <span style="margin-right:0.85rem;"><strong>${f.wicketNumber}-${f.runs}</strong> (${f.batsmanName}, ${f.overs} ov)</span>
                             `).join(', ')}
                         </div>
@@ -658,7 +725,7 @@ const ScoreshUI = {
                     <div style="padding:0.85rem 1.25rem; border-top:1px solid var(--border-light);">
                         <span class="text-xs font-bold uppercase text-muted">Partnerships:</span>
                         <div class="text-sm" style="margin-top:0.25rem;">
-                            ${inn.partnerships.length === 0 ? '<span class="text-muted">—</span>' : inn.partnerships.map(p => `
+                            ${(inn.partnerships || []).length === 0 ? '<span class="text-muted">—</span>' : inn.partnerships.map(p => `
                                 <span style="margin-right:1rem;"><strong>${p.runs} runs</strong> (${p.balls}b) — ${p.batsman1Name} & ${p.batsman2Name} ${p.isCurrent ? '<span class="badge-strike">Active</span>' : ''}</span>
                             `).join(' • ')}
                         </div>
@@ -678,16 +745,23 @@ const ScoreshUI = {
                                 </tr>
                             </thead>
                             <tbody>
-                                ${inn.bowlers.map(bw => `
-                                    <tr>
-                                        <td><strong>${bw.name}</strong> ${bw.isCurrentBowler ? '<span class="badge-strike">Bowling</span>' : ''}</td>
-                                        <td class="text-right font-mono">${bw.overs}</td>
-                                        <td class="text-right font-mono">${bw.maidens}</td>
-                                        <td class="text-right font-mono">${bw.runsgv}</td>
-                                        <td class="text-right font-mono font-bold text-green">${bw.wkttkn}</td>
-                                        <td class="text-right font-mono text-muted">${window.ScoreshCalculations.formatStat(bw.economy)}</td>
-                                    </tr>
-                                `).join('')}
+                                ${(inn.bowlers || []).length === 0 ? '<tr><td colspan="6" class="text-muted text-sm">No bowlers recorded yet</td></tr>' : inn.bowlers.map(bw => {
+                                    const cleanBwId = bw.playerId || String(bw.id).replace(/^bowl_/, '');
+                                    const realPlr = tournament ? tournament.getPlayer(cleanBwId) : (window.getPlayerById ? window.getPlayerById(cleanBwId) : null);
+                                    const bwName = realPlr ? realPlr.name : (bw.name || 'Bowler');
+
+                                    const isCurrent = (cleanBwId === inn.currentBowlerId || bw.id === 'bowl_' + inn.currentBowlerId || bw.id === inn.currentBowlerId);
+                                    return `
+                                        <tr>
+                                            <td><strong>${bwName}</strong> ${isCurrent ? '<span class="badge-strike">Bowling</span>' : ''}</td>
+                                            <td class="text-right font-mono">${bw.overs}</td>
+                                            <td class="text-right font-mono">${bw.maidens}</td>
+                                            <td class="text-right font-mono">${bw.runsgv}</td>
+                                            <td class="text-right font-mono font-bold text-green">${bw.wkttkn}</td>
+                                            <td class="text-right font-mono text-muted">${window.ScoreshCalculations.formatStat(bw.economy)}</td>
+                                        </tr>
+                                    `;
+                                }).join('')}
                             </tbody>
                         </table>
                     </div>
@@ -695,26 +769,62 @@ const ScoreshUI = {
             `;
         };
 
-        container.innerHTML = `
+        return `
             <div style="background-color:var(--bg-card); border:1px solid var(--border-color); border-radius:var(--radius-md); padding:1.25rem; margin-bottom:1.5rem;">
                 <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem;">
                     <div>
-                        <h2 style="font-size:1.4rem; font-weight:800;">${match.title}</h2>
-                        <p class="text-sm text-muted">${match.venue} • ${match.date} • ${match.matchFormat} (${match.totalOvers} Overs)</p>
+                        <h2 style="font-size:1.4rem; font-weight:800; color:var(--color-primary);">${match.title}</h2>
+                        <p class="text-sm text-muted">📍 ${match.venue} • ${match.date} • ${match.matchFormat} (${match.totalOvers} Overs) • Status: <strong style="text-transform:uppercase;">${match.status}</strong></p>
                     </div>
-                    ${match.resultSummary ? `
-                        <div style="text-align:right;">
-                            <span class="badge-strike">Result</span>
-                            <div style="font-weight:800; font-size:1.1rem; color:var(--color-green); margin-top:0.25rem;">${match.resultSummary}</div>
-                            ${match.playerOfTheMatch ? `<div class="text-xs text-muted">Player of the Match: <strong>${match.playerOfTheMatch}</strong></div>` : ''}
-                        </div>
-                    ` : ''}
+                    <div style="display:flex; align-items:center; gap:0.75rem;">
+                        ${match.resultSummary ? `
+                            <div style="text-align:right;">
+                                <span class="badge-strike">Result</span>
+                                <div style="font-weight:800; font-size:1.1rem; color:var(--color-green); margin-top:0.25rem;">${match.resultSummary}</div>
+                                ${match.playerOfTheMatch ? `<div class="text-xs text-muted">Player of the Match: <strong>${match.playerOfTheMatch}</strong></div>` : ''}
+                            </div>
+                        ` : ''}
+                        ${isHost ? `
+                            <button class="btn btn-secondary btn-sm" onclick="window.ScoreshModals.openMatchSummaryEditModal('${match.id}')">Edit Summary</button>
+                        ` : ''}
+                    </div>
                 </div>
             </div>
 
             ${renderInningsTable(match.firstInnings, 1)}
             ${renderInningsTable(match.secondInnings, 2)}
         `;
+    },
+
+    // --- 8. FULL MATCH SCORECARD VIEW ---
+    renderScorecardView(state) {
+        const container = document.getElementById('scorecard-full-container');
+        if (!container) return;
+
+        const tournament = state.activeTournament;
+        if (!tournament || !tournament.matches || tournament.matches.length === 0) {
+            container.innerHTML = `<div class="empty-state-card"><p class="text-muted">No matches available in this tournament to view scorecard.</p></div>`;
+            return;
+        }
+
+        // Populate Match Selector
+        const matchSelect = document.getElementById('scorecard-match-select');
+        if (matchSelect) {
+            matchSelect.innerHTML = tournament.matches.map(m => `
+                <option value="${m.id}" ${state.activeMatch && state.activeMatch.id === m.id ? 'selected' : ''}>
+                    ${m.title} (${m.status.toUpperCase()})
+                </option>
+            `).join('');
+        }
+
+        // Auto fallback to active match or first match
+        let match = state.activeMatch;
+        if (!match || !tournament.matches.find(m => m.id === match.id)) {
+            match = tournament.matches.find(m => m.status === 'live') || tournament.matches[0];
+            state.activeMatch = match;
+        }
+
+        container.innerHTML = this.buildScorecardHTML(match, tournament, state.isHost);
     },
 
     // --- 9. POINTS TABLE VIEW ---

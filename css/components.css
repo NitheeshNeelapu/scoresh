@@ -1061,3 +1061,91 @@
 .toast-success .toast-icon { color: var(--color-green); }
 .toast-error .toast-icon { color: var(--color-red); }
 .toast-info .toast-icon { color: #60a5fa; }
+
+/* Over Complete Next Bowler Cards */
+.next-bowler-card-option {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.85rem 1rem;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    margin-bottom: 0.5rem;
+    cursor: pointer;
+    background-color: #ffffff;
+    transition: all var(--transition-fast);
+}
+
+.next-bowler-card-option:hover {
+    border-color: var(--color-green);
+    background-color: var(--color-green-light);
+    transform: translateX(3px);
+}
+
+/* ==========================================================================
+   WINNING PROBABILITY WIDGET & VISUALIZATION
+   ========================================================================== */
+
+.winning-prob-card {
+    background-color: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    padding: 1.2rem;
+    margin-bottom: 1.5rem;
+    box-shadow: var(--shadow-sm);
+}
+
+.win-prob-bar-wrapper {
+    display: flex;
+    height: 32px;
+    border-radius: var(--radius-sm);
+    overflow: hidden;
+    background-color: #e2e8f0;
+    border: 1px solid var(--border-color);
+    margin: 0.6rem 0;
+    position: relative;
+}
+
+.win-prob-bar-segment {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    color: #ffffff;
+    font-weight: 700;
+    font-size: 0.85rem;
+    transition: width 0.4s ease-in-out;
+    white-space: nowrap;
+    overflow: hidden;
+    padding: 0 0.5rem;
+}
+
+.win-prob-bar-segment.team-a-segment {
+    background: linear-gradient(90deg, #16a34a, #22c55e);
+}
+
+.win-prob-bar-segment.team-b-segment {
+    background: linear-gradient(90deg, #0f172a, #334155);
+}
+
+.win-prob-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+    gap: 0.75rem;
+    padding-top: 0.75rem;
+    border-top: 1px solid var(--border-light);
+    margin-top: 0.5rem;
+}
+
+.prob-substat-item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+}
+
+.prob-substat-item strong {
+    font-size: 0.95rem;
+    font-family: var(--font-mono);
+}
+
+
