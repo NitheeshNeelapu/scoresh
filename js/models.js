@@ -499,7 +499,8 @@ class Match {
         keyMoments = '',
         lastBowlerId = null,
         probabilityHistory = [],
-        winProbability = null
+        winProbability = null,
+        extras = null
     } = {}) {
         this.id = id || 'match_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5);
         this.tournamentId = tournamentId;
@@ -514,6 +515,7 @@ class Match {
         this.teamBColor = teamBColor || '#0f172a';
         this.teamAPlayingXI = Array.isArray(teamAPlayingXI) ? [...teamAPlayingXI] : [];
         this.teamBPlayingXI = Array.isArray(teamBPlayingXI) ? [...teamBPlayingXI] : [];
+        this.extras = extras;
         this.date = date || new Date().toISOString().split('T')[0];
         this.time = time || '14:00';
         this.venue = venue || 'Main Cricket Ground';
@@ -703,7 +705,7 @@ function getPlayerById(playerId) {
     return null;
 }
 
-// Export to window
+// Export to window / global
 if (typeof window !== 'undefined') {
     window.Player = Player;
     window.Team = Team;
@@ -715,3 +717,18 @@ if (typeof window !== 'undefined') {
     window.Tournament = Tournament;
     window.getPlayerById = getPlayerById;
 }
+if (typeof globalThis !== 'undefined') {
+    globalThis.Player = Player;
+    globalThis.Team = Team;
+    globalThis.Batsman = Batsman;
+    globalThis.Bowler = Bowler;
+    globalThis.Delivery = Delivery;
+    globalThis.Innings = Innings;
+    globalThis.Match = Match;
+    globalThis.Tournament = Tournament;
+    globalThis.getPlayerById = getPlayerById;
+}
+if (typeof module !== 'undefined' && module.exports) {
+    module.exports = { Player, Team, Batsman, Bowler, Delivery, Innings, Match, Tournament, getPlayerById };
+}
+

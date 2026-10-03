@@ -7,6 +7,9 @@
     <title>Scoresh — Dynamic Cricket Tournament Platform</title>
     <meta name="description"
         content="Dynamic cricket scoring, tournament management, live ball-by-ball updates, points table, player statistics, and analytics platform.">
+    <link rel="icon"
+        href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🏏</text></svg>">
+
 
     <!-- Google Fonts: Inter & JetBrains Mono -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -25,7 +28,236 @@
 </head>
 
 <body>
-    <div class="app-container">
+    <!-- ============ LOGIN SCREEN (SCORESH ORANGE, BLACK & WHITE) ============ -->
+    <div id="loginScreen" style="position:fixed;inset:0;background:radial-gradient(circle at 50% 25%, rgba(237, 90, 40, 0.07) 0%, rgba(244, 244, 242, 0.96) 55%, #EAEAE7 100%), #F4F4F2;z-index:99999;display:flex;align-items:center;justify-content:center;font-family:var(--font-sans, 'Inter', -apple-system, BlinkMacSystemFont, sans-serif);padding:1.25rem;box-sizing:border-box;">
+      <div style="background:#ffffff;padding:38px 36px 32px;border-radius:20px;width:100%;max-width:440px;box-sizing:border-box;color:#111111;text-align:center;box-shadow:0 10px 30px -5px rgba(17, 17, 17, 0.08), 0 4px 12px -2px rgba(17, 17, 17, 0.04);border:1px solid #E2E2DE;position:relative;">
+        
+        <!-- Scoresh Brand Icon & Header -->
+        <div style="width:52px;height:52px;background:#ED5A28;color:#ffffff;border-radius:12px;display:inline-flex;align-items:center;justify-content:center;margin-bottom:14px;box-shadow:0 4px 14px rgba(237, 90, 40, 0.32);">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"/>
+            <path d="M12 2a14.5 14.5 0 0 0 0 20"/>
+            <path d="M2 12h20"/>
+          </svg>
+        </div>
+        <h1 style="margin:0 0 4px;font-size:1.75rem;font-weight:800;color:#111111;letter-spacing:-0.03em;">Scoresh</h1>
+        <p style="color:#ED5A28;font-weight:700;font-size:0.86rem;margin:0 0 4px;letter-spacing:-0.01em;">Every Run. Every Ball. Every Record.</p>
+        <p style="color:#777777;font-size:0.84rem;margin:0 0 22px;font-weight:400;">Live Cricket Tournament Platform</p>
+
+        <!-- Segmented Tab Control (Host vs Participant) -->
+        <div id="loginTabs" style="display:flex;gap:4px;margin-bottom:20px;background:#F4F4F2;padding:4px;border-radius:10px;border:1px solid #E2E2DE;">
+          <button id="tabHost" type="button" style="flex:1;padding:9px 12px;border:none;border-radius:7px;background:#ED5A28;color:#ffffff;font-weight:600;font-size:0.88rem;cursor:pointer;transition:all 0.2s;box-shadow:0 1px 3px rgba(237, 90, 40, 0.25);">Host</button>
+          <button id="tabPlayer" type="button" style="flex:1;padding:9px 12px;border:none;border-radius:7px;background:transparent;color:#777777;font-weight:500;font-size:0.88rem;cursor:pointer;transition:all 0.2s;">Participant</button>
+        </div>
+
+        <!-- Host Access Panel -->
+        <div id="hostPanel">
+          <div style="text-align:left;margin-bottom:6px;">
+            <label for="hostPw" style="font-size:0.82rem;font-weight:600;color:#111111;">Host Password</label>
+          </div>
+          <input id="hostPw" type="password" placeholder="Enter host password" autocomplete="current-password" style="width:100%;padding:11px 13px;border-radius:8px;border:1px solid #E2E2DE;background:#ffffff;color:#111111;font-size:0.92rem;box-sizing:border-box;outline:none;transition:border-color 0.2s,box-shadow 0.2s;" onfocus="this.style.borderColor='#ED5A28';this.style.boxShadow='0 0 0 3px rgba(237, 90, 40, 0.15)'" onblur="this.style.borderColor='#E2E2DE';this.style.boxShadow='none'">
+          <button id="btnHostLogin" onclick="doHostLogin()" style="width:100%;margin-top:14px;padding:12px 16px;border:none;border-radius:8px;background:#ED5A28;color:#ffffff;font-weight:700;font-size:0.92rem;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:6px;box-shadow:0 2px 6px rgba(237, 90, 40, 0.25);transition:background 0.2s,transform 0.1s;" onmouseover="this.style.background='#D44718'" onmouseout="this.style.background='#ED5A28'">Continue as Host &rarr;</button>
+        </div>
+
+        <!-- Participant Access Panel -->
+        <div id="playerPanel" style="display:none;">
+          <div style="text-align:left;margin-bottom:6px;">
+            <label for="playerMob" style="font-size:0.82rem;font-weight:600;color:#111111;">Your Mobile Number</label>
+          </div>
+          <input id="playerMob" type="tel" placeholder="e.g. 9876543210" autocomplete="tel" style="width:100%;padding:11px 13px;border-radius:8px;border:1px solid #E2E2DE;background:#ffffff;color:#111111;font-size:0.92rem;box-sizing:border-box;outline:none;transition:border-color 0.2s,box-shadow 0.2s;" onfocus="this.style.borderColor='#ED5A28';this.style.boxShadow='0 0 0 3px rgba(237, 90, 40, 0.15)'" onblur="this.style.borderColor='#E2E2DE';this.style.boxShadow='none'">
+          <button id="btnPlayerLogin" onclick="doPlayerLogin()" style="width:100%;margin-top:14px;padding:12px 16px;border:none;border-radius:8px;background:#ED5A28;color:#ffffff;font-weight:700;font-size:0.92rem;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:6px;box-shadow:0 2px 6px rgba(237, 90, 40, 0.25);transition:background 0.2s,transform 0.1s;" onmouseover="this.style.background='#D44718'" onmouseout="this.style.background='#ED5A28'">Continue to Live Scores &rarr;</button>
+        </div>
+
+        <!-- Feedback & Error Message Container -->
+        <p id="loginErr" style="color:#dc2626;font-size:13px;font-weight:600;min-height:20px;margin:14px 0 0;text-align:center;display:flex;align-items:center;justify-content:center;gap:4px;"></p>
+      </div>
+    </div>
+
+    <script>
+    function getSupabaseClient() {
+      return window.scoreshSupabase || (typeof supabase !== 'undefined' && supabase.from ? supabase : null);
+    }
+
+    // --- restore session on reload ---
+    async function restoreLogin() {
+      const role = localStorage.getItem('scoresh_role');
+      if (role === 'host') {
+        if (window.authService && typeof window.authService.loginAsHost === 'function') {
+          window.authService.loginAsHost('Tournament Host', 'Vignan@2026');
+        }
+        unlockApp();
+      } else if (role === 'player') {
+        const mob = localStorage.getItem('scoresh_mobile');
+        if (mob) {
+          let attempts = 0;
+          while (!getSupabaseClient() && attempts < 15) {
+            await new Promise(r => setTimeout(r, 100));
+            attempts++;
+          }
+          let player = null;
+          try {
+            player = await findPlayerByMobile(mob);
+          } catch(e) {}
+          if (player) {
+            if (window.authService && typeof window.authService.loginAsParticipant === 'function') {
+              window.authService.loginAsParticipant(player.name || 'Cricket Participant');
+            }
+            unlockApp();
+            return;
+          }
+        }
+        // If not restorable, clear stale role
+        localStorage.removeItem('scoresh_role');
+        localStorage.removeItem('scoresh_mobile');
+        localStorage.removeItem('scoresh_player');
+      }
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', restoreLogin);
+    } else {
+      restoreLogin();
+    }
+
+    // --- tabs ---
+    const tabHost = document.getElementById('tabHost');
+    const tabPlayer = document.getElementById('tabPlayer');
+    const hostPanel = document.getElementById('hostPanel');
+    const playerPanel = document.getElementById('playerPanel');
+    const hostPw = document.getElementById('hostPw');
+    const playerMob = document.getElementById('playerMob');
+    const loginErr = document.getElementById('loginErr');
+
+    tabHost.onclick = () => {
+      tabHost.style.background = '#ED5A28'; tabHost.style.color = '#ffffff'; tabHost.style.fontWeight = '600'; tabHost.style.boxShadow = '0 1px 3px rgba(237, 90, 40, 0.25)';
+      tabPlayer.style.background = 'transparent'; tabPlayer.style.color = '#777777'; tabPlayer.style.fontWeight = '500'; tabPlayer.style.boxShadow = 'none';
+      hostPanel.style.display = ''; playerPanel.style.display = 'none';
+      loginErr.innerHTML = '';
+    };
+    tabPlayer.onclick = () => {
+      tabPlayer.style.background = '#ED5A28'; tabPlayer.style.color = '#ffffff'; tabPlayer.style.fontWeight = '600'; tabPlayer.style.boxShadow = '0 1px 3px rgba(237, 90, 40, 0.25)';
+      tabHost.style.background = 'transparent'; tabHost.style.color = '#777777'; tabHost.style.fontWeight = '500'; tabHost.style.boxShadow = 'none';
+      playerPanel.style.display = ''; hostPanel.style.display = 'none';
+      loginErr.innerHTML = '';
+    };
+
+    if (hostPw) {
+      hostPw.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') doHostLogin();
+      });
+    }
+    if (playerMob) {
+      playerMob.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') doPlayerLogin();
+      });
+    }
+
+    async function doHostLogin() {
+      const pw = hostPw.value.trim();
+      if (!pw) {
+        loginErr.innerHTML = '<span>Enter the password</span>';
+        return;
+      }
+
+      let isValid = false;
+      const client = getSupabaseClient();
+      if (client) {
+        try {
+          const { data, error } = await client.from('app_settings').select('value').eq('key', 'host_password').maybeSingle();
+          if (!error && data && data.value) {
+            isValid = (data.value === pw);
+          }
+        } catch (e) {
+          console.warn('Supabase auth check fallback:', e);
+        }
+      }
+
+      if (!isValid) {
+        if (window.authService && typeof window.authService.verifyHostPassword === 'function') {
+          isValid = window.authService.verifyHostPassword(pw);
+        } else {
+          isValid = (pw === 'Vignan@2026');
+        }
+      }
+
+      if (isValid) {
+        localStorage.setItem('scoresh_role', 'host');
+        if (window.authService && typeof window.authService.loginAsHost === 'function') {
+          window.authService.loginAsHost('Tournament Host', pw);
+        }
+        if (window.scoreState && typeof window.scoreState.notify === 'function') {
+          window.scoreState.notify();
+        }
+        unlockApp();
+      } else {
+        loginErr.innerHTML = '<span style="font-size:14px;font-weight:700;">&#10005;</span> Wrong password';
+      }
+    }
+
+    async function findPlayerByMobile(mob) {
+      const client = getSupabaseClient();
+      if (!client) return null;
+      const { data } = await client.from('players').select('id,name').eq('mobile_number', mob).maybeSingle();
+      return data;
+    }
+
+    async function doPlayerLogin() {
+      const mob = playerMob.value.replace(/\D/g, '');
+      if (!mob) {
+        loginErr.innerHTML = '<span>Enter your mobile number</span>';
+        return;
+      }
+      let player = null;
+      try {
+        player = await findPlayerByMobile(mob);
+      } catch(e) {}
+      if (player) {
+        localStorage.setItem('scoresh_role', 'player');
+        localStorage.setItem('scoresh_mobile', mob);
+        localStorage.setItem('scoresh_player', JSON.stringify(player));
+        if (window.authService && typeof window.authService.loginAsParticipant === 'function') {
+          window.authService.loginAsParticipant(player.name || 'Cricket Participant');
+        }
+        if (window.scoreState && typeof window.scoreState.notify === 'function') {
+          window.scoreState.notify();
+        }
+        unlockApp();
+      } else {
+        loginErr.innerHTML = '<span style="font-size:14px;font-weight:700;">&#10005;</span> Number not registered. Ask your captain to add you via the form.';
+      }
+    }
+
+    function unlockApp() {
+      const el = document.getElementById('loginScreen');
+      if (el) el.style.display = 'none';
+      const app = document.querySelector('.app-container');
+      if (app) app.style.display = 'flex';
+      
+      const role = localStorage.getItem('scoresh_role');
+      console.log('[login] unlocked as', role);
+
+      // Route directly to dashboard or tournaments (never to welcome)
+      if (window.scoreState) {
+        if (window.scoreState.tournaments && window.scoreState.tournaments.length > 0) {
+          window.scoreState.setView('dashboard');
+        } else {
+          window.scoreState.setView('tournaments');
+        }
+      }
+    }
+
+    // logout helper — run window.logout() in console or via UI anytime
+    window.logout = () => {
+      localStorage.clear();
+      if (window.authService && typeof window.authService.logout === 'function') {
+        window.authService.logout();
+      }
+      location.reload();
+    };
+    </script>
+    <!-- ============ END LOGIN ============ -->
+
+    <div class="app-container" style="display:none;">
 
         <!-- ==========================================
              NAVIGATION BAR
@@ -33,7 +265,7 @@
         <header class="navbar">
             <div class="nav-inner">
                 <!-- Brand Logo & Name -->
-                <div class="nav-brand" data-view="welcome">
+                <div class="nav-brand" data-view="dashboard">
                     <div class="brand-logo-icon">
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                             stroke-width="2.2">
@@ -126,7 +358,6 @@
                     <button class="btn-close-modal" id="close-drawer-btn">&times;</button>
                 </div>
                 <ul class="mobile-nav-links">
-                    <li><a href="#welcome" class="mobile-nav-link" data-view="welcome">Home / Choice</a></li>
                     <li class="requires-tournament"><a href="#dashboard" class="mobile-nav-link"
                             data-view="dashboard">Tournament Dashboard</a></li>
                     <li><a href="#tournaments" class="mobile-nav-link" data-view="tournaments">All Tournaments</a></li>
@@ -163,7 +394,7 @@
             <!-- ----------------------------------------
                  1. VIEW: WELCOME & ONBOARDING CHOICE
                  ---------------------------------------- -->
-            <section id="view-welcome" class="spa-view active">
+            <section id="view-welcome" class="spa-view">
                 <div class="welcome-screen-container">
                     <div class="welcome-hero-card">
                         <h1 class="welcome-title">Welcome to Scoresh</h1>
@@ -230,7 +461,7 @@
             <!-- ----------------------------------------
                  2. VIEW: TOURNAMENT DASHBOARD
                  ---------------------------------------- -->
-            <section id="view-dashboard" class="spa-view">
+            <section id="view-dashboard" class="spa-view active">
                 <div class="page-header">
                     <div class="page-title-group">
                         <h1 id="dash-tourn-name">Tournament Dashboard</h1>
@@ -445,7 +676,7 @@
 
                     <!-- Innings Break Banner -->
                     <div id="live-innings-break-banner"
-                        style="display:none; background-color:var(--color-green-light); border:1px solid #86efac; border-radius:var(--radius-md); padding:1rem 1.25rem; margin-bottom:1.5rem; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem;">
+                        style="display:none; background-color:var(--color-green-light); border:1px solid #FAC5B3; border-radius:var(--radius-md); padding:1rem 1.25rem; margin-bottom:1.5rem; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem;">
                         <div>
                             <strong style="color:var(--color-green-text); font-size:1.1rem;">Innings Break!</strong>
                             <span class="text-xs text-muted" id="live-innings-target-text"
@@ -554,8 +785,10 @@
 
                     <!-- Estimated Winning Probability Widget -->
                     <div class="winning-prob-card" id="live-win-prob-card">
-                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.6rem; flex-wrap:wrap; gap:0.5rem;">
-                            <span class="text-xs font-bold uppercase text-muted" style="letter-spacing:0.05em;">Estimated Winning Probability</span>
+                        <div
+                            style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.6rem; flex-wrap:wrap; gap:0.5rem;">
+                            <span class="text-xs font-bold uppercase text-muted"
+                                style="letter-spacing:0.05em;">Estimated Winning Probability</span>
                             <span class="text-xs text-muted" id="live-prob-equation">Match In Progress</span>
                         </div>
                         <div class="win-prob-bar-wrapper">
@@ -631,12 +864,16 @@
 
                     <!-- Embedded Live Match Full Scorecard Section -->
                     <div class="live-embedded-scorecard-section" style="margin-bottom:1.5rem;">
-                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.75rem; flex-wrap:wrap; gap:0.5rem;">
-                            <h3 style="font-size:1.15rem; font-weight:800; display:flex; align-items:center; gap:0.5rem;">
+                        <div
+                            style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.75rem; flex-wrap:wrap; gap:0.5rem;">
+                            <h3
+                                style="font-size:1.15rem; font-weight:800; display:flex; align-items:center; gap:0.5rem;">
                                 <span>📋 Full Match Scorecard</span>
                             </h3>
                             <div style="display:flex; gap:0.5rem;">
-                                <button class="btn btn-secondary btn-sm" onclick="window.scoreState.setView('scorecard')">Open Dedicated Scorecard View &rarr;</button>
+                                <button class="btn btn-secondary btn-sm"
+                                    onclick="window.scoreState.setView('scorecard')">Open Dedicated Scorecard View
+                                    &rarr;</button>
                             </div>
                         </div>
                         <div id="live-embedded-scorecard-container"></div>
@@ -673,9 +910,13 @@
                     </div>
                 </div>
 
-                <div class="scorecard-match-selector-bar" style="background-color:var(--bg-card); border:1px solid var(--border-color); border-radius:var(--radius-md); padding:0.75rem 1rem; margin-bottom:1.25rem; display:flex; align-items:center; gap:1rem; flex-wrap:wrap;">
-                    <label for="scorecard-match-select" style="font-size:0.85rem; font-weight:700; color:var(--color-muted);">SELECT MATCH:</label>
-                    <select id="scorecard-match-select" class="form-input" style="max-width:340px; padding:0.4rem 0.75rem;" onchange="window.scoreState.selectMatch(this.value, 'scorecard')"></select>
+                <div class="scorecard-match-selector-bar"
+                    style="background-color:var(--bg-card); border:1px solid var(--border-color); border-radius:var(--radius-md); padding:0.75rem 1rem; margin-bottom:1.25rem; display:flex; align-items:center; gap:1rem; flex-wrap:wrap;">
+                    <label for="scorecard-match-select"
+                        style="font-size:0.85rem; font-weight:700; color:var(--color-muted);">SELECT MATCH:</label>
+                    <select id="scorecard-match-select" class="form-input"
+                        style="max-width:340px; padding:0.4rem 0.75rem;"
+                        onchange="window.scoreState.selectMatch(this.value, 'scorecard')"></select>
                 </div>
 
                 <div id="scorecard-full-container"></div>
@@ -929,8 +1170,10 @@
             <div class="modal-body">
                 <!-- Host Login Panel -->
                 <div id="auth-panel-host">
-                    <div style="background-color:var(--color-green-light); border:1px solid #86efac; padding:0.65rem 0.85rem; border-radius:var(--radius-sm); margin-bottom:1rem; font-size:0.85rem; color:var(--color-green-dark);">
-                        👑 <strong>Host Access:</strong> Create tournaments, schedule fixtures, record ball deliveries & manage squads.
+                    <div
+                        style="background-color:var(--color-green-light); border:1px solid #FAC5B3; padding:0.65rem 0.85rem; border-radius:var(--radius-sm); margin-bottom:1rem; font-size:0.85rem; color:var(--color-green-dark);">
+                        👑 <strong>Host Access:</strong> Create tournaments, schedule fixtures, record ball deliveries &
+                        manage squads.
                     </div>
                     <form id="auth-form-host">
                         <div class="form-group">
@@ -943,21 +1186,26 @@
                             <input type="password" id="auth-host-pass" class="form-input" placeholder="••••••••"
                                 required value="host123">
                         </div>
-                        <button type="submit" class="btn btn-primary" style="width:100%; margin-top:0.5rem;">Login as Host &rarr;</button>
+                        <button type="submit" class="btn btn-primary" style="width:100%; margin-top:0.5rem;">Login as
+                            Host &rarr;</button>
                     </form>
                 </div>
 
                 <!-- Participant Login Panel -->
                 <div id="auth-panel-participant" style="display:none;">
-                    <div style="background-color:var(--color-blue-light); border:1px solid #93c5fd; padding:0.65rem 0.85rem; border-radius:var(--radius-sm); margin-bottom:1rem; font-size:0.85rem; color:var(--color-blue);">
-                        🏏 <strong>Participant Access:</strong> Follow live matches, view real-time scorecards, commentary & tournament statistics (Read-only).
+                    <div
+                        style="background-color:var(--color-blue-light); border:1px solid #93c5fd; padding:0.65rem 0.85rem; border-radius:var(--radius-sm); margin-bottom:1rem; font-size:0.85rem; color:var(--color-blue);">
+                        🏏 <strong>Participant Access:</strong> Follow live matches, view real-time scorecards,
+                        commentary & tournament statistics (Read-only).
                     </div>
                     <form id="auth-form-participant">
                         <div class="form-group">
                             <label class="form-label">Your Name / Nickname</label>
-                            <input type="text" id="auth-part-name" class="form-input" placeholder="e.g. Cricket Fan" required value="Cricket Fan">
+                            <input type="text" id="auth-part-name" class="form-input" placeholder="e.g. Cricket Fan"
+                                required value="Cricket Fan">
                         </div>
-                        <button type="submit" class="btn btn-accent" style="width:100%; margin-top:0.5rem;">Enter as Participant &rarr;</button>
+                        <button type="submit" class="btn btn-accent" style="width:100%; margin-top:0.5rem;">Enter as
+                            Participant &rarr;</button>
                     </form>
                 </div>
             </div>
@@ -974,18 +1222,22 @@
             </div>
             <form id="modal-security-form">
                 <div class="modal-body">
-                    <p class="text-xs text-muted" style="margin-bottom:1rem;">Change your custom host password for live tournament scoring authentication.</p>
+                    <p class="text-xs text-muted" style="margin-bottom:1rem;">Change your custom host password for live
+                        tournament scoring authentication.</p>
                     <div class="form-group">
                         <label class="form-label">Current Host Password *</label>
-                        <input type="password" id="sec-curr-pass" class="form-input" placeholder="Current password" required>
+                        <input type="password" id="sec-curr-pass" class="form-input" placeholder="Current password"
+                            required>
                     </div>
                     <div class="form-group">
                         <label class="form-label">New Password *</label>
-                        <input type="password" id="sec-new-pass" class="form-input" placeholder="At least 4 characters" required minlength="4">
+                        <input type="password" id="sec-new-pass" class="form-input" placeholder="At least 4 characters"
+                            required minlength="4">
                     </div>
                     <div class="form-group">
                         <label class="form-label">Confirm New Password *</label>
-                        <input type="password" id="sec-conf-pass" class="form-input" placeholder="Re-enter new password" required minlength="4">
+                        <input type="password" id="sec-conf-pass" class="form-input" placeholder="Re-enter new password"
+                            required minlength="4">
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -1104,7 +1356,7 @@
                             <input type="text" id="wiz-team-short" class="form-input"
                                 placeholder="Short Code (e.g. THX)">
                             <div style="display:flex; gap:0.4rem;">
-                                <input type="color" id="wiz-team-color" value="#16a34a"
+                                <input type="color" id="wiz-team-color" value="#ED5A28"
                                     style="height:38px; width:44px; border:1px solid var(--border-color); border-radius:4px; padding:2px; cursor:pointer;">
                                 <button type="button" class="btn btn-primary btn-sm" id="wiz-add-team-btn">+
                                     Add</button>
@@ -1118,7 +1370,8 @@
                 <div class="wizard-step-panel" data-step="3" style="display:none;">
                     <div
                         style="background-color:var(--bg-subtle); padding:1rem; border-radius:var(--radius-sm); margin-bottom:1rem;">
-                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.6rem;">
+                        <div
+                            style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.6rem;">
                             <h4 style="font-size:0.9rem; margin:0;">Add Player to Team Squad</h4>
                             <span id="wiz-squad-counter" class="badge-nonstrike">0/20 Players (Min: 11, Max: 20)</span>
                         </div>
@@ -1194,8 +1447,10 @@
                     teams before starting the match.</p>
                 <div class="form-grid-2">
                     <div>
-                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.5rem;">
-                            <h4 id="xi-team-a-name" style="font-size:0.95rem; color:var(--color-green-dark); margin:0;">Team A</h4>
+                        <div
+                            style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.5rem;">
+                            <h4 id="xi-team-a-name" style="font-size:0.95rem; color:var(--color-green-dark); margin:0;">
+                                Team A</h4>
                             <span id="xi-team-a-count" class="badge-nonstrike">0/11 Selected</span>
                         </div>
                         <div id="xi-team-a-list"
@@ -1203,8 +1458,10 @@
                         </div>
                     </div>
                     <div>
-                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.5rem;">
-                            <h4 id="xi-team-b-name" style="font-size:0.95rem; color:var(--color-primary); margin:0;">Team B</h4>
+                        <div
+                            style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.5rem;">
+                            <h4 id="xi-team-b-name" style="font-size:0.95rem; color:var(--color-primary); margin:0;">
+                                Team B</h4>
                             <span id="xi-team-b-count" class="badge-nonstrike">0/11 Selected</span>
                         </div>
                         <div id="xi-team-b-list"
@@ -1215,7 +1472,8 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-close-modal>Cancel</button>
-                <button type="button" class="btn btn-accent" id="save-playing-xi-btn">Confirm Squads & Proceed to Toss &rarr;</button>
+                <button type="button" class="btn btn-accent" id="save-playing-xi-btn">Confirm Squads & Proceed to Toss
+                    &rarr;</button>
             </div>
         </div>
     </div>
@@ -1378,7 +1636,8 @@
                 <button class="btn-close-modal" data-close-modal>&times;</button>
             </div>
             <div class="modal-body">
-                <p id="next-bowler-prev-text" class="text-xs text-muted" style="margin-bottom:1rem;">Previous bowler cannot bowl consecutive overs.</p>
+                <p id="next-bowler-prev-text" class="text-xs text-muted" style="margin-bottom:1rem;">Previous bowler
+                    cannot bowl consecutive overs.</p>
                 <div id="next-bowler-options-list" style="max-height:300px; overflow-y:auto;"></div>
             </div>
             <div class="modal-footer">
@@ -1541,7 +1800,7 @@
                         </div>
                         <div class="form-group">
                             <label class="form-label">Team Color Theme</label>
-                            <input type="color" id="modal-team-color" value="#16a34a"
+                            <input type="color" id="modal-team-color" value="#ED5A28"
                                 style="height:42px; width:100%; border:1px solid var(--border-color); border-radius:4px; padding:2px; cursor:pointer;">
                         </div>
                     </div>
@@ -1644,18 +1903,112 @@
     </div>
 
 
-    <!-- Application Script Modules (In Dependency Order) -->
-    <script src="js/auth.js"></script>
+    <!-- Supabase SDK + config (what you already added) -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <script>
+        window.SCORESH_SUPABASE_URL = "https://nwxjugnjwtethhlwdoim.supabase.co";
+        window.SCORESH_SUPABASE_KEY = "sb_publishable_T2wIg_Jetza6N9ZYKZCHWg_-yXVUl24";
+        window.SCORESH_STORAGE_MODE = 'local';
+        window.scoreshSupabase = supabase.createClient(
+            window.SCORESH_SUPABASE_URL,
+            window.SCORESH_SUPABASE_KEY
+        );
+    </script>
+
+    <!-- App scripts (correct order) -->
     <script src="js/models.js"></script>
-    <script src="js/calculations.js"></script>
     <script src="js/storage.js"></script>
+    <script src="js/migrate.js"></script>
+    <script src="js/supabase-sync.js"></script>
+    <script src="js/calculations.js"></script>
+    <script src="js/auth.js"></script>
     <script src="js/state.js"></script>
     <script src="js/scoring.js"></script>
-    <script src="js/wizard.js"></script>
     <script src="js/modals.js"></script>
+    <script src="js/wizard.js"></script>
     <script src="js/charts.js"></script>
     <script src="js/ui.js"></script>
     <script src="js/app.js"></script>
+
+    <!-- ============ GOOGLE FORMS AUTO-IMPORTER ============ -->
+    <script>
+    const SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTsludI2oHCdVSyAI7ZG8klvLQm2bXXanj-aw6BAioRPsI11xckm-q_lYQyd1Cz8RvenfweujW86rYZ/pub?gid=452333906&single=true&output=csv';
+
+    function parseCsvLine(line) {
+        const out = []; let cur = '', inQ = false;
+        for (let i = 0; i < line.length; i++) {
+            const ch = line[i];
+            if (ch === '"') { inQ = !inQ; }
+            else if (ch === ',' && !inQ) { out.push(cur); cur = ''; }
+            else { cur += ch; }
+        }
+        out.push(cur);
+        return out;
+    }
+
+    async function importFromGoogleForm() {
+        const supabase = window.scoreshSupabase || (typeof supabase !== 'undefined' && supabase.from ? supabase : null);
+        if (!supabase) return console.log('[import] waiting for supabase client...');
+
+        try {
+            const res = await fetch(SHEET_CSV_URL);
+            const csv = await res.text();
+            const lines = csv.split('\n').filter(l => l.trim());
+            if (lines.length < 2) return console.log('[import] no responses yet');
+            const header = parseCsvLine(lines[0]).map(h => h.trim().toLowerCase());
+
+            const iT = header.indexOf('tournament name');
+            const iCapName = header.indexOf('captain name');
+            const iCapMob = header.indexOf('captain mobile no.');
+
+            for (let r = 1; r < lines.length; r++) {
+                const cols = parseCsvLine(lines[r]);
+                const tournament = (cols[iT] || '').trim();
+                const capName = (cols[iCapName] || '').trim();
+                const capMob = (cols[iCapMob] || '').trim();
+                if (!tournament || !capName) continue;
+
+                const teamName = capName; // Option A: team = captain name
+
+                // 1. Upsert tournament
+                let { data: t } = await supabase.from('tournaments').select('id').eq('name', tournament).maybeSingle();
+                if (!t) { const ins = await supabase.from('tournaments').insert({ name: tournament }).select('id').single(); t = ins.data; }
+                if (!t) continue;
+
+                // 2. Upsert team
+                let { data: team } = await supabase.from('teams').select('id').eq('name', teamName).eq('tournament_id', t.id).maybeSingle();
+                if (!team) {
+                    const ins = await supabase.from('teams').insert({ name: teamName, color: '#3b82f6', tournament_id: t.id }).select('id').single();
+                    team = ins.data;
+                }
+                if (!team) continue;
+
+                // 3. Players = captain + all filled name/mobile pairs
+                const players = [{ name: capName, mobile: capMob }];
+                for (let c = iCapMob + 1; c + 1 < cols.length; c += 2) {
+                    const nm = (cols[c] || '').trim();
+                    const mo = (cols[c + 1] || '').trim();
+                    if (nm) players.push({ name: nm, mobile: mo });
+                }
+
+                for (const p of players) {
+                    if (!p.name) continue;
+                    const { data: existing } = await supabase.from('players').select('id')
+                        .eq('team_id', team.id).eq('name', p.name).maybeSingle();
+                    if (!existing) {
+                        await supabase.from('players').insert({ name: p.name, mobile_number: p.mobile || null, team_id: team.id });
+                    }
+                }
+                console.log('[import] team:', teamName, '-', players.length, 'players (incl. captain)');
+            }
+        } catch (e) { console.error('[import] error:', e); }
+    }
+
+    importFromGoogleForm();
+    setInterval(importFromGoogleForm, 120000);
+    </script>
+    <!-- ============ END IMPORTER ============ -->
 </body>
 
 </html>

@@ -6,7 +6,7 @@
  * Resolves all player entities strictly by Player IDs from tournament player database.
  */
 
-const ScoreshCalculations = {
+var ScoreshCalculations = {
     /**
      * C Program Formula: Runs = (ones * 1) + (twos * 2) + (threes * 3) + (fours * 4) + (sixes * 6)
      */
@@ -850,8 +850,86 @@ const ScoreshCalculations = {
             centuriesCount: centuries,
             fiftiesCount: fifties
         };
+    },
+
+    /**
+     * Computes match total aggregates
+     */
+    computeMatchTotals(batsmen = [], bowlers = [], match = {}) {
+        let totalBatsmanRuns = 0;
+        let totalFours = 0;
+        let totalSixes = 0;
+        (batsmen || []).forEach(b => {
+            const r = typeof b.calculateRuns === 'function' ? b.calculateRuns() : (b.runs || 0);
+            totalBatsmanRuns += r;
+            totalFours += (b.fours || 0);
+            totalSixes += (b.sixes || 0);
+        });
+
+        let totalExtras = 0;
+        if (match && match.extras) {
+            totalExtras = (match.extras.wides || 0) + (match.extras.noBalls || 0) + (match.extras.byes || 0) + (match.extras.legByes || 0) + (match.extras.penalty || 0);
+        }
+
+        let totalWickets = 0;
+        (bowlers || []).forEach(bw => {
+            totalWickets += (bw.wkttkn || 0);
+        });
+
+        return {
+            totalBatsmanRuns,
+            totalExtras,
+            totalRuns: totalBatsmanRuns + totalExtras,
+            totalWickets,
+            totalFours,
+            totalSixes
+        };
+    },
+
+    /**
+     * Computes match records (highest score, most wickets, etc.)
+     */
+    computeRecords(batsmen = [], bowlers = [], match = {}) {
+        let highestScore = null;
+        let mostSixes = null;
+        (batsmen || []).forEach(b => {
+            const r = typeof b.calculateRuns === 'function' ? b.calculateRuns() : (b.runs || 0);
+            const highestRuns = highestScore ? (typeof highestScore.calculateRuns === 'function' ? highestScore.calculateRuns() : (highestScore.runs || 0)) : -1;
+            if (!highestScore || r > highestRuns) {
+                highestScore = b;
+            }
+            if (!mostSixes || (b.sixes || 0) > (mostSixes.sixes || 0)) {
+                mostSixes = b;
+            }
+        });
+
+        let mostWickets = null;
+        let bestEconomy = null;
+        (bowlers || []).forEach(bw => {
+            if (!mostWickets || (bw.wkttkn || 0) > (mostWickets.wkttkn || 0)) {
+                mostWickets = bw;
+            }
+            const econ = typeof bw.calculateEconomy === 'function' ? bw.calculateEconomy() : (bw.economy || 0);
+            const bestEcon = bestEconomy ? (typeof bestEconomy.calculateEconomy === 'function' ? bestEconomy.calculateEconomy() : (bestEconomy.economy || 999)) : 999;
+            if (bw.overs > 0 && (!bestEconomy || econ < bestEcon)) {
+                bestEconomy = bw;
+            }
+        });
+
+        return {
+            highestScore,
+            mostSixes,
+            mostWickets,
+            bestEconomy
+        };
     }
 };
 
 // Global Calculations instance
-window.ScoreshCalculations = ScoreshCalculations;
+if (typeof window !== 'undefined') {
+    window.ScoreshCalculations = ScoreshCalculations;
+}
+if (typeof module !== 'undefined' && module.exports) {
+    module.exports = ScoreshCalculations;
+}
+

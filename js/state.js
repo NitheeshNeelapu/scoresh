@@ -7,7 +7,7 @@
 class ScoreshState {
     constructor() {
         this.listeners = [];
-        this.activeView = 'welcome';
+        this.activeView = 'dashboard';
         this.searchQuery = '';
         this.activeTournamentId = null;
         this.activeMatchId = null;
@@ -21,9 +21,9 @@ class ScoreshState {
         this.activeTournamentId = window.scoreStorage.getActiveTournamentId();
         this.activeMatchId = window.scoreStorage.getActiveMatchId();
 
-        // If no tournaments exist, start in welcome state
+        // If no tournaments exist, start in tournaments directory view
         if (this.tournaments.length === 0) {
-            this.activeView = 'welcome';
+            this.activeView = 'tournaments';
             this.activeTournamentId = null;
             this.activeMatchId = null;
         } else {
@@ -143,7 +143,7 @@ class ScoreshState {
         if (this.tournaments.length === 0) {
             this.activeTournamentId = null;
             this.activeMatchId = null;
-            this.activeView = 'welcome';
+            this.activeView = 'tournaments';
         } else {
             this.activeTournamentId = this.tournaments[0].id;
             window.scoreStorage.setActiveTournamentId(this.activeTournamentId);

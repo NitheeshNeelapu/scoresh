@@ -60,7 +60,7 @@
     left: 0;
     right: 0;
     height: 4px;
-    background: linear-gradient(90deg, var(--color-primary) 0%, var(--color-green) 100%);
+    background: linear-gradient(90deg, #ED5A28 0%, #FFA07A 100%);
 }
 
 .welcome-title {
@@ -72,7 +72,7 @@
 
 .welcome-subtitle {
     font-size: 1.1rem;
-    color: var(--color-green-dark);
+    color: var(--color-orange);
     font-weight: 600;
     margin-bottom: 2rem;
 }
@@ -252,7 +252,7 @@
 .wizard-step-indicator.completed .step-num-badge {
     background-color: var(--color-green-light);
     color: var(--color-green-text);
-    border-color: #86efac;
+    border-color: #FAC5B3;
 }
 
 .wizard-item-row {
@@ -288,7 +288,7 @@
     left: 0;
     right: 0;
     height: 4px;
-    background: linear-gradient(90deg, var(--color-primary) 0%, var(--color-green) 100%);
+    background: linear-gradient(90deg, #ED5A28 0%, #FFA07A 100%);
 }
 
 .card-header-status {
@@ -314,6 +314,7 @@
     color: var(--color-green-text);
     padding: 0.25rem 0.65rem;
     border-radius: var(--radius-full);
+    border: 1px solid #FAC5B3;
     font-size: 0.75rem;
     font-weight: 700;
     text-transform: uppercase;
@@ -453,7 +454,8 @@
 }
 
 .player-mini-card.active-crease {
-    border-left: 4px solid var(--color-green);
+    border-left: 4px solid var(--color-orange);
+    background: linear-gradient(135deg, #ffffff 0%, #FDF2EE 100%);
 }
 
 .mini-card-header {
@@ -535,25 +537,32 @@
 
 .btn-live-ball:hover {
     background-color: var(--bg-hover);
-    border-color: var(--border-dark);
+    border-color: var(--color-orange);
+    color: var(--color-orange);
     transform: translateY(-1px);
 }
 
 .btn-live-ball.ball-pressed {
     transform: scale(0.92);
-    background-color: var(--color-green-light);
+    background-color: var(--color-orange-light);
 }
 
 .btn-ball-four {
-    background-color: var(--color-green-light);
-    color: var(--color-green-text);
-    border-color: #86efac;
+    background-color: var(--color-orange-light);
+    color: var(--color-orange-text);
+    border-color: #FAC5B3;
 }
 
 .btn-ball-six {
-    background-color: var(--color-primary);
+    background-color: var(--color-orange);
     color: #ffffff;
-    border-color: var(--color-primary);
+    border-color: var(--color-orange-dark);
+    box-shadow: 0 2px 4px rgba(237, 90, 40, 0.25);
+}
+
+.btn-ball-six:hover {
+    background-color: var(--color-orange-dark);
+    border-color: var(--color-orange-dark);
 }
 
 .btn-ball-wicket {
@@ -596,8 +605,8 @@
     flex-shrink: 0;
 }
 
-.ball-chip.ball-four { background-color: var(--color-green-light); color: var(--color-green-text); }
-.ball-chip.ball-six { background-color: var(--color-primary); color: #ffffff; }
+.ball-chip.ball-four { background-color: var(--color-orange-light); color: var(--color-orange-text); border: 1px solid #FAC5B3; }
+.ball-chip.ball-six { background-color: var(--color-orange); color: #ffffff; }
 .ball-chip.ball-wicket { background-color: var(--color-red); color: #ffffff; }
 
 /* Commentary Timeline */
@@ -815,14 +824,14 @@
 }
 
 .scorecard-table th {
-    background-color: var(--bg-card-subtle);
-    color: var(--color-muted);
-    font-weight: 600;
+    background-color: #f8fafc;
+    color: var(--color-primary);
+    font-weight: 700;
     font-size: 0.78rem;
     text-transform: uppercase;
     letter-spacing: 0.05em;
-    padding: 0.75rem 1rem;
-    border-bottom: 1px solid var(--border-color);
+    padding: 0.8rem 1rem;
+    border-bottom: 2px solid var(--border-color);
     white-space: nowrap;
 }
 
@@ -837,7 +846,7 @@
 }
 
 .scorecard-table tbody tr.row-striker {
-    background-color: #f0fdf4;
+    background-color: #FDF2EE;
 }
 
 .scorecard-table tfoot td {
@@ -850,8 +859,9 @@
 .badge-strike {
     font-size: 0.68rem;
     font-weight: 700;
-    background-color: var(--color-green-light);
-    color: var(--color-green-text);
+    background-color: var(--color-orange-light);
+    color: var(--color-orange-text);
+    border: 1px solid #FAC5B3;
     padding: 0.15rem 0.45rem;
     border-radius: 4px;
 }
@@ -1121,11 +1131,11 @@
 }
 
 .win-prob-bar-segment.team-a-segment {
-    background: linear-gradient(90deg, #16a34a, #22c55e);
+    background: linear-gradient(90deg, #ED5A28, #F97316);
 }
 
 .win-prob-bar-segment.team-b-segment {
-    background: linear-gradient(90deg, #0f172a, #334155);
+    background: linear-gradient(90deg, #111111, #333333);
 }
 
 .win-prob-stats-grid {

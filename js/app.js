@@ -43,9 +43,9 @@ function setupNavigation() {
     const handleNav = (viewName) => {
         if (!viewName) return;
 
-        // If no tournaments and user tries to navigate to a tournament view, redirect to welcome
-        if (window.scoreState.tournaments.length === 0 && !['welcome', 'tournaments'].includes(viewName)) {
-            window.scoreState.setView('welcome');
+        // If no tournaments and user tries to navigate to a tournament-specific view, redirect to tournaments directory
+        if (window.scoreState.tournaments.length === 0 && !['tournaments', 'welcome'].includes(viewName)) {
+            window.scoreState.setView('tournaments');
             window.ScoreshModals.showToast('Please create or select a tournament first', 'info');
             return;
         }
@@ -69,14 +69,16 @@ function setupNavigation() {
     // Hash change handler
     window.addEventListener('hashchange', () => {
         const hash = window.location.hash.replace('#', '');
-        if (['welcome', 'dashboard', 'tournaments', 'matches', 'teams', 'players', 'live', 'scorecard', 'table', 'records', 'analytics'].includes(hash)) {
+        if (['dashboard', 'tournaments', 'matches', 'teams', 'players', 'live', 'scorecard', 'table', 'records', 'analytics'].includes(hash)) {
             handleNav(hash);
+        } else if (hash === 'welcome') {
+            handleNav('dashboard');
         }
     });
 
     // Check initial hash
     const initialHash = window.location.hash.replace('#', '');
-    if (initialHash && ['welcome', 'dashboard', 'tournaments', 'matches', 'teams', 'players', 'live', 'scorecard', 'table', 'records', 'analytics'].includes(initialHash)) {
+    if (initialHash && ['dashboard', 'tournaments', 'matches', 'teams', 'players', 'live', 'scorecard', 'table', 'records', 'analytics'].includes(initialHash)) {
         handleNav(initialHash);
     }
 }

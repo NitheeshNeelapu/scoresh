@@ -410,12 +410,12 @@ print("  [OK] PASSED: Winning probability increased on boundaries!")
 
 # TEST 7 — HOST LOGIN & PASSWORD SECURITY HASH VALIDATION
 print("\n[TEST 7] HOST LOGIN & PASSWORD HASH VALIDATION")
-HOST_PASSWORD_HASH = "e48b6ce60a0018a846c9d9d31f07deaff2660de1d6474c2444cb740c8bca971c"
+HOST_PASSWORD_HASH = "4dc6459c6eb25681a64bb4f921c2503ad9cce26e404f76a3a401a824be629ee0"
 
 def verify_host(pwd):
     return hashlib.sha256(pwd.encode('utf-8')).hexdigest() == HOST_PASSWORD_HASH
 
-assert verify_host("VIGNAN@mahotsav") == True, "Host password VIGNAN@mahotsav must validate"
+assert verify_host("Vignan@2026") == True, "Host password Vignan@2026 must validate"
 assert verify_host("wrong_pwd") == False, "Wrong password must be rejected"
 assert verify_host("admin") == False, "Admin password must be rejected"
 print("  [OK] PASSED: Host password securely authenticated via SHA-256 without plaintext exposure!")

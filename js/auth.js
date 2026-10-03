@@ -74,9 +74,9 @@ function computeSHA256(ascii) {
     return result;
 }
 
-// Secure Environment / Backend Isolated Credential Configuration (Precomputed SHA-256 Digest)
+// Secure Environment / Backend Isolated Credential Configuration (Precomputed SHA-256 Digest for Vignan@2026)
 const SECURE_CONFIG = {
-    DEFAULT_HOST_PASSWORD_HASH: 'e48b6ce60a0018a846c9d9d31f07deaff2660de1d6474c2444cb740c8bca971c'
+    DEFAULT_HOST_PASSWORD_HASH: '4dc6459c6eb25681a64bb4f921c2503ad9cce26e404f76a3a401a824be629ee0'
 };
 
 class User {
@@ -133,21 +133,35 @@ class AuthService {
     }
 
     init() {
-        // Ensure default host password hash in storage
-        if (!localStorage.getItem(this.STORAGE_KEY_HOST_PASS_HASH)) {
+        // Ensure default host password hash in storage (migrate from legacy default if unchanged)
+        const storedHash = localStorage.getItem(this.STORAGE_KEY_HOST_PASS_HASH);
+        if (!storedHash || storedHash === 'e48b6ce60a0018a846c9d9d31f07deaff2660de1d6474c2444cb740c8bca971c') {
             localStorage.setItem(this.STORAGE_KEY_HOST_PASS_HASH, SECURE_CONFIG.DEFAULT_HOST_PASSWORD_HASH);
         }
 
+        const role = localStorage.getItem('scoresh_role');
         const savedUser = this.loadCurrentSession();
-        if (savedUser) {
+        if (savedUser && role) {
             this.currentUser = new User(savedUser);
-        } else {
+            this.currentUser.role = role;
+        } else if (role === 'host') {
             this.currentUser = new User({
                 name: 'Tournament Host',
                 email: 'host@scoresh.com',
                 role: 'host'
             });
             this.saveCurrentSession(this.currentUser);
+        } else if (role === 'player') {
+            let player = {};
+            try { player = JSON.parse(localStorage.getItem('scoresh_player') || '{}'); } catch(e) {}
+            this.currentUser = new User({
+                name: player.name || 'Cricket Participant',
+                email: `fan_${Date.now()}@scoresh.com`,
+                role: 'participant'
+            });
+            this.saveCurrentSession(this.currentUser);
+        } else {
+            this.currentUser = null;
         }
     }
 
@@ -204,9 +218,22 @@ class AuthService {
         return { success: true, user };
     }
 
+    switchRole(role) {
+        if (!this.currentUser) {
+            this.currentUser = new User({ role: role === 'host' ? 'host' : 'participant', name: role === 'host' ? 'Tournament Host' : 'Cricket Participant' });
+        } else {
+            this.currentUser.role = role === 'host' ? 'host' : 'participant';
+        }
+        localStorage.setItem('scoresh_role', this.currentUser.role);
+        this.saveCurrentSession(this.currentUser);
+    }
+
     logout() {
         this.currentUser = null;
         localStorage.removeItem(this.STORAGE_KEY_AUTH_USER);
+        localStorage.removeItem('scoresh_role');
+        localStorage.removeItem('scoresh_mobile');
+        localStorage.removeItem('scoresh_player');
     }
 
     saveCurrentSession(user) {

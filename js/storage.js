@@ -166,4 +166,70 @@ class StorageService {
 }
 
 // Global Storage instance
-window.scoreStorage = new StorageService();
+if (typeof window !== 'undefined') {
+    window.scoreStorage = new StorageService();
+} else if (typeof globalThis !== 'undefined') {
+    globalThis.scoreStorage = new StorageService();
+}
+
+/* ============================================================
+   STORAGE MODE LAYER (local | supabase)
+   Added on top of the existing StorageService.
+   Local mode = exact same sync behavior as before.
+   ============================================================ */
+
+(function () {
+    const MODE = (typeof window !== 'undefined' && window.SCORESH_STORAGE_MODE ? window.SCORESH_STORAGE_MODE : 'local').toLowerCase();
+
+    // Get the existing local storage instance however it was created
+    const localService = typeof window !== 'undefined' ? window.scoreStorage : (typeof globalThis !== 'undefined' ? globalThis.scoreStorage : null);
+
+    if (!localService) {
+        console.error('[Scoresh] Existing StorageService not found. Is it defined above?');
+        return;
+    }
+
+    // Tag the mode so we can verify in console
+    localService.mode = MODE;
+
+    // ---------- SUPABASE IMPLEMENTATIONS ----------
+    const supabaseMethods = {
+        async getTournaments() {
+            if (typeof window === 'undefined' || !window.scoreshSupabase) return [];
+            const { data, error } = await window.scoreshSupabase
+                .from('tournaments')
+                .select('*')
+                .order('created_at', { ascending: true });
+            if (error) { console.error('[Scoresh Supabase]', error); return []; }
+            return data || [];
+        },
+
+        async saveTournament(tournament) {
+            if (typeof window === 'undefined' || !window.scoreshSupabase) return null;
+            const { data, error } = await window.scoreshSupabase
+                .from('tournaments')
+                .upsert(tournament)
+                .select();
+            if (error) { console.error('[Scoresh Supabase]', error); return null; }
+            return data ? data[0] : null;
+        },
+
+        async deleteTournament(id) {
+            if (typeof window === 'undefined' || !window.scoreshSupabase) return false;
+            const { error } = await window.scoreshSupabase
+                .from('tournaments')
+                .delete()
+                .eq('id', id);
+            if (error) console.error('[Scoresh Supabase]', error);
+            return !error;
+        }
+    };
+
+    // Attach supabase methods (they only activate when mode = 'supabase')
+    Object.keys(supabaseMethods).forEach(name => {
+        localService['sb_' + name] = supabaseMethods[name];
+    });
+
+    console.log('[Scoresh] Storage mode:', MODE);
+})();
+

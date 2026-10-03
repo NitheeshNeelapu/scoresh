@@ -4,34 +4,41 @@
    ========================================================================== */
 
 :root {
-    /* Color Palette */
-    --bg-main: #f8fafc;
-    --bg-card: #ffffff;
-    --bg-card-subtle: #f8fafc;
-    --bg-subtle: #f1f5f9;
-    --bg-hover: #f1f5f9;
-    --bg-dark: #0f172a;
+    /* Color Palette - Scoresh Bold Sports Identity (Orange + Black + White) */
+    --bg-main: #F4F4F2;             /* Clean sports light grey background */
+    --bg-card: #FFFFFF;             /* Pure White card */
+    --bg-card-subtle: #F4F4F2;      /* Light Grey surface */
+    --bg-subtle: #F4F4F2;           /* Light Grey */
+    --bg-hover: #EAEAE7;            /* Subtle Grey hover */
+    --bg-dark: #111111;             /* Dark Black */
     
-    --color-primary: #0f172a;       /* Deep charcoal / near-black */
-    --color-secondary: #334155;     /* Slate charcoal */
-    --color-muted: #64748b;         /* Muted gray */
-    --color-subtle: #94a3b8;        /* Light slate */
+    --color-primary: #111111;       /* Dark Black headings/numbers/text */
+    --color-secondary: #333333;     /* Dark Grey supporting text */
+    --color-muted: #777777;         /* Medium Grey labels/secondary info */
+    --color-subtle: #999999;        /* Light Grey secondary */
     
-    --color-green: #16a34a;         /* Cricket green accent */
-    --color-green-dark: #15803d;
-    --color-green-light: #dcfce7;
-    --color-green-text: #166534;
+    /* Primary Sports Orange Accent (#ED5A28) */
+    --color-orange: #ED5A28;
+    --color-orange-dark: #D44718;
+    --color-orange-light: #FDF2EE;
+    --color-orange-text: #ED5A28;
 
-    --color-amber: #d97706;
-    --color-amber-light: #fef3c7;
-    --color-red: #dc2626;
-    --color-red-light: #fee2e2;
-    --color-blue: #2563eb;
-    --color-blue-light: #dbeafe;
+    /* Seamless Backward-Compatible Aliases */
+    --color-green: #ED5A28;
+    --color-green-dark: #D44718;
+    --color-green-light: #FDF2EE;
+    --color-green-text: #ED5A28;
 
-    --border-color: #e2e8f0;
-    --border-light: #f1f5f9;
-    --border-dark: #cbd5e1;
+    --color-amber: #D97706;
+    --color-amber-light: #FEF3C7;
+    --color-red: #DC2626;
+    --color-red-light: #FEE2E2;
+    --color-blue: #2563EB;
+    --color-blue-light: #DBEAFE;
+
+    --border-color: #E2E2DE;
+    --border-light: #EEEEEC;
+    --border-dark: #CCCCCC;
 
     /* Typography */
     --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
@@ -96,8 +103,10 @@ p {
 
 .text-muted { color: var(--color-muted) !important; }
 .text-subtle { color: var(--color-subtle) !important; }
-.text-green { color: var(--color-green) !important; }
+.text-orange { color: var(--color-orange) !important; }
+.text-green { color: var(--color-orange) !important; }
 .text-charcoal { color: var(--color-primary) !important; }
+.text-dark { color: var(--color-primary) !important; }
 .text-red { color: var(--color-red) !important; }
 .text-amber { color: var(--color-amber) !important; }
 .text-blue { color: var(--color-blue) !important; }
@@ -186,17 +195,17 @@ p {
 .brand-logo-icon {
     width: 32px;
     height: 32px;
-    background-color: var(--color-primary);
+    background-color: var(--color-orange);
     color: #ffffff;
     border-radius: var(--radius-sm);
     display: flex;
     align-items: center;
     justify-content: center;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 2px 8px rgba(237, 90, 40, 0.3);
 }
 
 .brand-logo-icon svg {
-    color: var(--color-green);
+    color: #ffffff;
 }
 
 .brand-text {
@@ -220,9 +229,9 @@ p {
 }
 
 .badge-host {
-    background-color: var(--color-green-light);
-    color: var(--color-green-text);
-    border-color: #86efac;
+    background-color: var(--color-orange-light);
+    color: var(--color-orange-text);
+    border-color: #FAC5B3;
 }
 
 .badge-participant {
@@ -245,7 +254,7 @@ p {
 }
 
 .tournament-switcher-btn {
-    background-color: var(--bg-subtle);
+    background-color: #ffffff;
     border: 1px solid var(--border-color);
     border-radius: var(--radius-sm);
     padding: 0.35rem 0.75rem;
@@ -256,12 +265,14 @@ p {
     align-items: center;
     gap: 0.5rem;
     cursor: pointer;
+    box-shadow: var(--shadow-sm);
     transition: all var(--transition-fast);
 }
 
 .tournament-switcher-btn:hover {
-    background-color: var(--bg-hover);
-    border-color: var(--border-dark);
+    background-color: #ffffff;
+    border-color: var(--color-orange);
+    box-shadow: 0 0 0 2px rgba(237, 90, 40, 0.15);
 }
 
 .tournament-dropdown-menu {
@@ -296,17 +307,18 @@ p {
 }
 
 .dropdown-item:hover, .dropdown-item.active {
-    background-color: var(--bg-hover);
+    background-color: var(--color-orange-light);
+    color: var(--color-orange);
 }
 
 .dropdown-create-btn {
-    color: var(--color-green);
-    background-color: var(--color-green-light);
+    color: var(--color-orange);
+    background-color: var(--color-orange-light);
     font-weight: 700;
 }
 
 .dropdown-create-btn:hover {
-    background-color: #bbf7d0;
+    background-color: #FAC5B3;
 }
 
 /* Nav Links */
@@ -327,18 +339,20 @@ p {
     color: var(--color-muted);
     font-weight: 500;
     font-size: 0.88rem;
+    border-bottom: 2px solid transparent;
     transition: all var(--transition-fast);
 }
 
 .nav-link:hover {
-    color: var(--color-primary);
+    color: var(--color-orange);
     background-color: var(--bg-hover);
 }
 
 .nav-link.active {
-    color: var(--color-primary);
-    background-color: var(--bg-subtle);
+    color: var(--color-orange);
+    background-color: var(--color-orange-light);
     font-weight: 600;
+    border-bottom: 2px solid var(--color-orange);
 }
 
 .nav-actions {
@@ -375,8 +389,8 @@ p {
 .search-input:focus {
     outline: none;
     background-color: #ffffff;
-    border-color: var(--color-green);
-    box-shadow: 0 0 0 2px rgba(22, 163, 74, 0.15);
+    border-color: var(--color-orange);
+    box-shadow: 0 0 0 2px rgba(237, 90, 40, 0.15);
     width: 200px;
 }
 
@@ -416,25 +430,28 @@ p {
 }
 
 .btn-primary {
-    background-color: var(--color-primary);
+    background-color: var(--color-orange);
     color: #ffffff;
-    border-color: var(--color-primary);
+    border-color: var(--color-orange);
+    box-shadow: 0 1px 3px rgba(237, 90, 40, 0.25);
 }
 
 .btn-primary:hover {
-    background-color: #1e293b;
-    border-color: #1e293b;
+    background-color: var(--color-orange-dark);
+    border-color: var(--color-orange-dark);
+    box-shadow: 0 2px 6px rgba(237, 90, 40, 0.35);
 }
 
 .btn-accent {
-    background-color: var(--color-green);
+    background-color: var(--color-orange);
     color: #ffffff;
-    border-color: var(--color-green);
+    border-color: var(--color-orange);
+    box-shadow: 0 1px 3px rgba(237, 90, 40, 0.25);
 }
 
 .btn-accent:hover {
-    background-color: var(--color-green-dark);
-    border-color: var(--color-green-dark);
+    background-color: var(--color-orange-dark);
+    border-color: var(--color-orange-dark);
 }
 
 .btn-secondary {
@@ -446,7 +463,8 @@ p {
 
 .btn-secondary:hover {
     background-color: var(--bg-hover);
-    border-color: var(--border-dark);
+    border-color: var(--color-orange);
+    color: var(--color-orange);
 }
 
 .btn-danger {
@@ -456,7 +474,9 @@ p {
 }
 
 .btn-danger:hover {
-    background-color: var(--color-red-light);
+    background-color: var(--color-red);
+    color: #ffffff;
+    border-color: var(--color-red);
 }
 
 .btn-sm {
@@ -504,7 +524,7 @@ p {
 
 .footer-tagline {
     font-size: 0.85rem;
-    color: var(--color-green-dark);
+    color: var(--color-orange);
     font-weight: 600;
 }
 
@@ -539,5 +559,5 @@ p {
 }
 
 .footer-link:hover {
-    color: var(--color-green);
+    color: var(--color-orange);
 }
